@@ -86,7 +86,7 @@
 //
 //#include "DataFormats/JetReco/interface/CaloJet.h"
 //#include "DataFormats/JetReco/interface/GenJet.h"
-//#include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
 //#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 //#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
@@ -150,6 +150,11 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    /// get MC info from GenParticleCandidates 
    Handle<GenParticleCollection> genParticles;
    iEvent.getByLabel( "genParticles", genParticles );
+
+   Handle<PFJetCollection> pfJets;
+   iEvent.getByLabel( "ak4PFJets", pfJets );
+
+   std::cout << "pfjets: " << pfJets->size() << std::endl;
 
    ////
    //// Loop over MC truth

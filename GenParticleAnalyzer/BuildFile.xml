@@ -9,5 +9,6 @@
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="DataFormats/HepMCCandidate"/>
 <use name="SimDataFormats/GeneratorProducts"/>
+<use name="DataFormats/JetReco"/>
 <flags EDM_PLUGIN="1"/>
 
