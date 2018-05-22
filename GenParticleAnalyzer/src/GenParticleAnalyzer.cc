@@ -36,15 +36,6 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-//#include "Geometry/Records/interface/IdealGeometryRecord.h"
-//#include "Geometry/Records/interface/CaloGeometryRecord.h"
-//#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
-//#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
-//#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
-//#include "Geometry/CaloTopology/interface/CaloSubdetectorTopology.h"
-//#include "Geometry/CaloTopology/interface/CaloTopology.h"
-//#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
-//
 
 #include "SimDataFormats/Track/interface/SimTrack.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
@@ -52,26 +43,6 @@
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
 
-//#include "DataFormats/TrackReco/interface/Track.h"
-//#include "DataFormats/EgammaCandidates/interface/Photon.h"
-//#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
-//#include "DataFormats/EgammaReco/interface/SuperCluster.h"
-//#include "DataFormats/HcalDetId/interface/HcalDetId.h"
-//#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-//#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
-//#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-//#include "DataFormats/EgammaReco/interface/ClusterShape.h"
-//#include "DataFormats/Candidate/interface/Candidate.h"
-//#include "DataFormats/EgammaReco/interface/BasicCluster.h"
-//
-//
-//#include "RecoCaloTools/Selectors/interface/CaloConeSelector.h"
-//#include "RecoCaloTools/MetaCollections/interface/CaloRecHitMetaCollections.h"
-//
-//#include "RecoEcal/EgammaCoreTools/interface/ClusterShapeAlgo.h"
-//
-//#include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
-//
 //#include "MagneticField/Engine/interface/MagneticField.h"
 //#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 //#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -83,8 +54,7 @@
 //#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 //#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
 //#include "TrackingTools/GsfTools/interface/GsfPropagatorAdapter.h"
-//
-//#include "DataFormats/JetReco/interface/CaloJet.h"
+
 //#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 //#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
@@ -96,10 +66,14 @@ using namespace edm;
 using namespace std;
 using namespace reco;
 
-GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& iConfig)
+
+GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
 {
   //MCTruthCollection_ = iConfig.getUntrackedParameter<edm::InputTag>("MCTruthCollection");
   //trackTags_ = iConfig.getUntrackedParameter<edm::InputTag>("tracks");
+
+  genParticleCollectionToken_ = consumes< GenParticleCollection >(edm::InputTag("genParticles"));
+  PFJetCollectionToken_ = consumes<PFJetCollection>(edm::InputTag("ak4PFJets"));
 
   m_tree = fs_->make<TTree>("gentree","");
 
@@ -140,26 +114,28 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    nMC = 0;
 
-   //// get generated pt hat
+   // get generated pt hat
    //Handle<double> genEventScale; 
    //iEvent.getByLabel( "genEventScale", genEventScale ); 
+   //ptHat = genEventInfo->qScale();   
 
    //Handle<GenEventInfoProduct> genEventInfo; 
    //iEvent.getByLabel( "generator", genEventInfo ); 
 
+   Handle< GenParticleCollection > genParticles;
+   iEvent.getByToken( genParticleCollectionToken_, genParticles );
+
+   //Handle<PFJetCollection> pfJets;
+   //iEvent.getByToken( PFJetCollectionToken_, pfJets );
+
+
    /// get MC info from GenParticleCandidates 
-   Handle<GenParticleCollection> genParticles;
-   iEvent.getByLabel( "genParticles", genParticles );
 
-   Handle<PFJetCollection> pfJets;
-   iEvent.getByLabel( "ak4PFJets", pfJets );
+   //std::cout << "pfjets: " << pfJets->size() << std::endl;
+   std::cout << "genParticles: " << genParticles->size() << std::endl;
 
-   std::cout << "pfjets: " << pfJets->size() << std::endl;
+   std::vector< const GenParticle* > kappas;
 
-   ////
-   //// Loop over MC truth
-   //
-   ////ptHat = genEventInfo->qScale();   
 
    for ( GenParticleCollection::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p ) {
     
@@ -175,11 +151,23 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      etaMC[nMC] = p->eta();	 
      phiMC[nMC] = p->phi();	 
 
+     //std::cout << "pdgIdMC[nMC] : " <<  pdgIdMC[nMC] << std::endl;
+     //std::cout << "statusMC[nMC] : " << statusMC[nMC] << std::endl;
+     //std::cout << "massMC[nMC] : " <<   massMC[nMC] << std::endl;
+     //std::cout << "pxMC[nMC] : " <<     pxMC[nMC] << std::endl;
+     //std::cout << "pyMC[nMC] : " <<     pyMC[nMC] << std::endl;
+     //std::cout << "pzMC[nMC] : " <<     pzMC[nMC] << std::endl;
+     //std::cout << "eMC[nMC] : " <<      eMC[nMC] << std::endl;
+     //std::cout << "etaMC[nMC] : " <<    etaMC[nMC] << std::endl;
+     //std::cout << "phiMC[nMC] : " <<    phiMC[nMC] << std::endl;
+
+     const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
+
+     if( abs(pdgIdMC[nMC])==321 ) kappas.push_back( thisGenP );
 
      nMC++;
 
    }
-   
    
    //Handle<SimTrackContainer> simTracks_h;
    //const SimTrackContainer* simTracks;

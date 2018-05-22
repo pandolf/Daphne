@@ -14,6 +14,10 @@
 #include "TTree.h"
 
 
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+
+
 //
 // class decleration
 //
@@ -54,6 +58,8 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Float_t etaMC[1000];
       Float_t phiMC[1000];
 
+      edm::EDGetTokenT<reco::GenParticleCollection> genParticleCollectionToken_;
+      edm::EDGetTokenT<reco::PFJetCollection> PFJetCollectionToken_;
   
 };
 
