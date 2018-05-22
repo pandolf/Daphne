@@ -16,6 +16,8 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "SimDataFormats/Track/interface/SimTrackContainer.h"
+#include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
 
 //
@@ -47,19 +49,21 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Float_t ptHat;
 
       Int_t nMC;
-      Int_t pdgIdMC[1000];
-      Int_t statusMC[1000];
-      Float_t massMC[1000];
-      Int_t motherIDMC[1000];
-      Float_t pxMC[1000];
-      Float_t pyMC[1000];
-      Float_t pzMC[1000];
-      Float_t eMC[1000];
-      Float_t etaMC[1000];
-      Float_t phiMC[1000];
+      Int_t pdgIdMC[300];
+      Int_t statusMC[300];
+      Float_t massMC[300];
+      Int_t motherIDMC[300];
+      Float_t pMC[300];
+      Float_t ptMC[300];
+      Float_t pzMC[300];
+      Float_t eMC[300];
+      Float_t etaMC[300];
+      Float_t phiMC[300];
+      Float_t vertR[300];
 
       edm::EDGetTokenT<reco::GenParticleCollection> genParticleCollectionToken_;
-      edm::EDGetTokenT<reco::PFJetCollection> PFJetCollectionToken_;
+      edm::EDGetTokenT<edm::SimTrackContainer > simTrackContainerToken_;
+      edm::EDGetTokenT<edm::SimVertexContainer> simVertexContainerToken_;
   
 };
 
