@@ -239,7 +239,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
              //double trackP = sqrt( trackPx*trackPx + trackPy*trackPy + trackPz*trackPz );
              //double trackPt = trackP*sin(theta);
 
-             if( vertR[i] < 0.5 && pMC[i]<1.2 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
+             if( vertR[i] < 60. && pMC[i]<1.2 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
 
 
            } //if vertindex
