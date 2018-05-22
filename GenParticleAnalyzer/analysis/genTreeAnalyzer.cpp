@@ -42,7 +42,7 @@ int main() {
 
         nGoodEta += 1;
 
-        if( vertR[i] < 60. ) {
+        if( vertR[i] < 60. && vertR[i]>0. ) {
 
           nGoodEtaVert += 1;
 
@@ -61,9 +61,9 @@ int main() {
   } // for entries
 
   std::cout << "Found these kappas in " << nentries << " events: " << std::endl;
-  std::cout << " |eta|<2.4   : " << nGoodEta      << " (" << 100.*nGoodEta     /nentries << "%)" << std::endl;
-  std::cout << "+ vertR<60cm : " << nGoodEtaVert  << " (" << 100.*nGoodEtaVert /nentries << "%)" << std::endl;
-  std::cout << "+ p<1.2 GeV  : " << nGoodEtaVertP << " (" << 100.*nGoodEtaVertP/nentries << "%)" << std::endl;
+  std::cout << " |eta|<2.4   : " << nGoodEta      << " (" << (float)nGoodEta     /nentries << " per event)" << std::endl;
+  std::cout << "+ vertR<60cm : " << nGoodEtaVert  << " (" << (float)nGoodEtaVert /nentries << " per event)" << std::endl;
+  std::cout << "+ p<1.2 GeV  : " << nGoodEtaVertP << " (" << (float)nGoodEtaVertP/nentries << " per event)" << std::endl;
 
   return 0;
 
