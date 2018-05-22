@@ -83,13 +83,15 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("nMC",&nMC,"nMC/I");
   m_tree->Branch("pdgIdMC",pdgIdMC,"pdgIdMC[nMC]/I");
   m_tree->Branch("statusMC",statusMC,"statusMC[nMC]/I");
-  m_tree->Branch("pMC ",pMC ,"pMC[nMC]/F");
-  m_tree->Branch("ptMC ",ptMC ,"ptMC[nMC]/F");
-  m_tree->Branch("pzMC ",pzMC ,"pzMC[nMC]/F");
-  m_tree->Branch("eMC  ",eMC  ,"eMC[nMC]/F");
+  m_tree->Branch("pMC",pMC ,"pMC[nMC]/F");
+  m_tree->Branch("ptMC",ptMC ,"ptMC[nMC]/F");
+  m_tree->Branch("pzMC",pzMC ,"pzMC[nMC]/F");
+  m_tree->Branch("eMC",eMC  ,"eMC[nMC]/F");
   m_tree->Branch("etaMC",etaMC,"etaMC[nMC]/F");
   m_tree->Branch("phiMC",phiMC,"phiMC[nMC]/F");
   m_tree->Branch("vertR",vertR,"vertR[nMC]/F");
+
+  m_h1_nGoodKappas = fs_->make<TH1D>("nGoodKappas", "", 6, -0.5, 5.5 );
 
   event = 0;  
   
@@ -116,16 +118,13 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    nMC = 0;
 
-   // get generated pt hat
-   //Handle<double> genEventScale; 
-   //iEvent.getByLabel( "genEventScale", genEventScale ); 
-   //ptHat = genEventInfo->qScale();   
 
    //Handle<GenEventInfoProduct> genEventInfo; 
    //iEvent.getByLabel( "generator", genEventInfo ); 
+   //ptHat = genEventInfo->qScale();   
 
 
-   Handle< GenParticleCollection > genParticles;
+   Handle<GenParticleCollection> genParticles;
    iEvent.getByToken( genParticleCollectionToken_, genParticles );
 
    Handle<SimTrackContainer> simTracks;
@@ -133,8 +132,6 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    Handle<SimVertexContainer> simVertices;
    iEvent.getByToken( simVertexContainerToken_, simVertices);
-
-   //iEvent.getByLabel("g4SimHits", simVert_h);
 
 
 
@@ -144,7 +141,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //std::cout << "pfjets: " << pfJets->size() << std::endl;
 
    std::vector< const GenParticle* > kappas;
-
+   int nGoodKappas=0;
 
    for ( GenParticleCollection::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p ) {
     
@@ -242,6 +239,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
              //double trackP = sqrt( trackPx*trackPx + trackPy*trackPy + trackPz*trackPz );
              //double trackPt = trackP*sin(theta);
 
+             if( vertR[i] < 0.5 && pMC[i]<1.2 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
+
 
            } //if vertindex
 
@@ -256,6 +255,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        
    } //for kappa track ID
 
+
+   m_h1_nGoodKappas->Fill( nGoodKappas );
   
    event++;  
    m_tree->Fill();
