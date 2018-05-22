@@ -82,8 +82,8 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("nMC",&nMC,"nMC/I");
   m_tree->Branch("pdgIdMC",pdgIdMC,"pdgIdMC[nMC]/I");
   m_tree->Branch("statusMC",statusMC,"statusMC[nMC]/I");
-  m_tree->Branch("pxMC ",pxMC ,"pxMC[nMC]/F");
-  m_tree->Branch("pyMC ",pyMC ,"pyMC[nMC]/F");
+  m_tree->Branch("pMC ",pMC ,"pMC[nMC]/F");
+  m_tree->Branch("ptMC ",ptMC ,"ptMC[nMC]/F");
   m_tree->Branch("pzMC ",pzMC ,"pzMC[nMC]/F");
   m_tree->Branch("eMC  ",eMC  ,"eMC[nMC]/F");
   m_tree->Branch("etaMC",etaMC,"etaMC[nMC]/F");
@@ -132,7 +132,6 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    /// get MC info from GenParticleCandidates 
 
    //std::cout << "pfjets: " << pfJets->size() << std::endl;
-   std::cout << "genParticles: " << genParticles->size() << std::endl;
 
    std::vector< const GenParticle* > kappas;
 
@@ -141,25 +140,17 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     
      if( nMC==1000 ) break;
 
+     if( abs(p->pdgId())!=321 ) continue;
+
      pdgIdMC[nMC] = p->pdgId();
      statusMC[nMC] = p->status();
      massMC[nMC] = p->mass();
-     pxMC[nMC] = p->px();	 
-     pyMC[nMC] = p->py();	 
-     pzMC[nMC] = p->pz();	 
-     eMC[nMC] = p->energy();	 
-     etaMC[nMC] = p->eta();	 
-     phiMC[nMC] = p->phi();	 
-
-     //std::cout << "pdgIdMC[nMC] : " <<  pdgIdMC[nMC] << std::endl;
-     //std::cout << "statusMC[nMC] : " << statusMC[nMC] << std::endl;
-     //std::cout << "massMC[nMC] : " <<   massMC[nMC] << std::endl;
-     //std::cout << "pxMC[nMC] : " <<     pxMC[nMC] << std::endl;
-     //std::cout << "pyMC[nMC] : " <<     pyMC[nMC] << std::endl;
-     //std::cout << "pzMC[nMC] : " <<     pzMC[nMC] << std::endl;
-     //std::cout << "eMC[nMC] : " <<      eMC[nMC] << std::endl;
-     //std::cout << "etaMC[nMC] : " <<    etaMC[nMC] << std::endl;
-     //std::cout << "phiMC[nMC] : " <<    phiMC[nMC] << std::endl;
+     ptMC[nMC] = sqrt( p->px()*p->px() + p->py()*p->py() );
+     pzMC[nMC] = p->pz();
+     pMC[nMC] = sqrt( pzMC[nMC]*pzMC[nMC] + ptMC[nMC]*ptMC[nMC] );
+     eMC[nMC] = p->energy();
+     etaMC[nMC] = p->eta();
+     phiMC[nMC] = p->phi();
 
      const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
 
