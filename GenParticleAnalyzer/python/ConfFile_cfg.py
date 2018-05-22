@@ -24,8 +24,12 @@ process.source = cms.Source("PoolSource",
     #    'file:myfile.root'
     #)
     #fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIFall17DRPremix/SingleNeutrino/AODSIM/94X_mc2017_realistic_v10-v1/60000/00232899-6ED7-E711-9355-0025905A4964.root')
-    #fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/PhaseISpring17GS/SingleNeutrino/GEN-SIM/90X_upgrade2017_realistic_v20_ext1-v1/100000/E8051D36-B52F-E711-B317-4C79BA18103F.root')
-    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/PhaseISpring17DR/SingleNeutrino/GEN-SIM-RECO/FlatPU0to75RECO_90X_upgrade2017_realistic_v20-v1/120000/001DD274-7240-E711-BB47-A0369FC5EEF4.root')
+    #fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/PhaseISpring17DR/SingleNeutrino/GEN-SIM-RECO/FlatPU0to75RECO_90X_upgrade2017_realistic_v20-v1/120000/001DD274-7240-E711-BB47-A0369FC5EEF4.root')
+    #fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/0024A35F-86EB-E711-A5BC-A4BF0112BC06.root')
+    #fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/0024A35F-86EB-E711-A5BC-A4BF0112BC06.root')
+    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIWinter17DR/QCD_Pt-15to3000_TuneCP5_Flat_13TeV_pythia8/GEN-SIM-RAW/NZSPU0to70_94X_upgrade2018_realistic_v8-v1/00000/0003F19E-74FF-E711-B73B-FA163E697F46.root')
+
+
 
 
 
