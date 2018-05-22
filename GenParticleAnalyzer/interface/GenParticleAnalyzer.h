@@ -12,6 +12,7 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1D.h"
 
 
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
@@ -43,6 +44,7 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       edm::Service<TFileService> fs_;
 
       TTree * m_tree ;
+      TH1D * m_h1_nGoodKappas ;
 
       Int_t event;
 
