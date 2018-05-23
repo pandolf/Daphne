@@ -37,6 +37,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
+#include "SimDataFormats/Track/interface/CoreSimTrack.h"
 #include "SimDataFormats/Track/interface/SimTrack.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "SimDataFormats/Vertex/interface/SimVertex.h"
@@ -67,6 +68,19 @@ using namespace std;
 using namespace reco;
 
 
+//class PartLite {
+//
+// public:
+//
+//  int pdgId;
+//  float p;
+//
+// private:
+//
+//
+//};
+
+
 GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
 {
   //MCTruthCollection_ = iConfig.getUntrackedParameter<edm::InputTag>("MCTruthCollection");
@@ -90,6 +104,9 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("etaMC",etaMC,"etaMC[nMC]/F");
   m_tree->Branch("phiMC",phiMC,"phiMC[nMC]/F");
   m_tree->Branch("vertR",vertR,"vertR[nMC]/F");
+  m_tree->Branch("trkIso",trkIso,"trkIso[nMC]/I");
+  m_tree->Branch("nLowP",nLowP,"nLowP[nMC]/I");
+  m_tree->Branch("decayMode",decayMode,"decayMode[nMC]/I");
 
   m_h1_nGoodKappas = fs_->make<TH1D>("nGoodKappas", "", 6, -0.5, 5.5 );
 
@@ -138,16 +155,14 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    /// get MC info from GenParticleCandidates 
 
-   //std::cout << "pfjets: " << pfJets->size() << std::endl;
-
    std::vector< const GenParticle* > kappas;
    int nGoodKappas=0;
 
    for ( GenParticleCollection::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p ) {
-    
-     if( nMC==1000 ) break;
 
-     if( abs(p->pdgId())!=321 ) continue;
+     if( nMC==300 ) break;
+
+     if( abs(p->pdgId())!=321 ) continue; // K+/-
 
      pdgIdMC[nMC] = p->pdgId();
      statusMC[nMC] = p->status();
@@ -160,16 +175,43 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      phiMC[nMC] = p->phi();
 
      vertR[nMC] = -1.;
+     trkIso[nMC] = 0;
+     nLowP[nMC] = 0;
+     decayMode[nMC] = -1;
 
      const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
 
-     if( abs(pdgIdMC[nMC])==321 ) kappas.push_back( thisGenP );
+     kappas.push_back( thisGenP );
 
      nMC++;
 
    }
    
-   //std::cout << simVertices << simTracks << std::endl;
+
+   for( unsigned i=0; i<kappas.size(); ++i ) {
+
+     for ( GenParticleCollection::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p ) {
+
+       if( p->pdgId()  == kappas[i]->pdgId() && 
+           p->eta()    == kappas[i]->eta() && 
+           p->phi()    == kappas[i]->phi() && 
+           p->energy() == kappas[i]->energy() ) continue;
+
+       if( p->charge()==0 ) continue;
+
+       float deltaEta = p->eta() - kappas[i]->eta();
+       float deltaPhi = p->phi() - kappas[i]->phi();
+       float pi = 3.14159;
+       while( deltaPhi >  pi ) deltaPhi -= 2.*pi;
+       while( deltaPhi < -pi ) deltaPhi += 2.*pi;
+       float deltaR = sqrt( deltaEta*deltaEta + deltaPhi*deltaPhi );
+
+       if( deltaR<0.05 ) trkIso[i] += 1;
+
+     } // for genparticles
+
+   } // for kappas
+
 
 
    std::vector<int> kappa_trackId;
@@ -198,59 +240,95 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    } //for kappa
 
 
+
+   // look for sim vertex:
+
    for( unsigned int i=0; i<kappa_trackId.size(); ++i ) {
 
-     int vertIndex = 0;
+     //std::vector<PartLite> daughters;
+     int nDaughters = 0;
+     int nPiCharged = 0;
+     int nPiNeutral = 0;
+     int nBaryons = 0;
+     int nElectrons = 0;
+     int nMuons = 0;
+     int nPhotons = 0;
 
      for(SimVertexContainer::const_iterator iVert = simVertices->begin(); iVert != simVertices->end(); ++iVert) {
 
        if( kappa_trackId[i] == iVert->parentIndex() ) {
 
-         for(SimTrackContainer::const_iterator iTrack=simTracks->begin(); iTrack!=simTracks->end(); ++iTrack) {
-    
-           if( iTrack->vertIndex()==vertIndex ) {
-          
-             Float_t vertX = iVert->position().x();
-             Float_t vertY = iVert->position().y();
-             //Float_t vertZ = iVert->position().z();
-          
-             //Float_t eta = iTrack->momentum().eta();
-             //Float_t theta = 2.*atan( exp(-eta));
+         Float_t vertX = iVert->position().x();
+         Float_t vertY = iVert->position().y();
+         //Float_t vertZ = iVert->position().z();
+         
+         //Float_t eta = iTrack->momentum().eta();
+         //Float_t theta = 2.*atan( exp(-eta));
 
-             vertR[i] = sqrt(vertX*vertX+vertY*vertY);
+         vertR[i] = sqrt(vertX*vertX+vertY*vertY);
 
-             //if( (first)&&(fabs(eta)<1.4) ) {
-             //  h1_mfpkappa_itCone5->Fill(R*sin(theta));
-             //  first=false;
-             //}
-          
-             //bool decayedBeforeCalo=false;
-
-             //if( fabs(eta)<1.4 ) {
-             //  if( R<129. ) decayedBeforeCalo=true;
-             //} else { 
-             //  if( fabs(vertZ) < 304. ) decayedBeforeCalo=true;
-             //}
-
-             //double trackE =  iTrack->momentum().e();
-             //double trackPx = iTrack->momentum().px();
-             //double trackPy = iTrack->momentum().py();
-             //double trackPz = iTrack->momentum().pz();
-             //double trackP = sqrt( trackPx*trackPx + trackPy*trackPy + trackPz*trackPz );
-             //double trackPt = trackP*sin(theta);
-
-             if( vertR[i] < 60. && pMC[i]<1.2 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
+         if( vertR[i] < 60. && pMC[i]<1.05 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
 
 
-           } //if vertindex
+         if( vertR[i]<60. && fabs(etaMC[i])<2.4 ) {
 
-         } //for simtracks
-       
+           //std::cout << std::endl;
+           //std::cout << "PDGID: " << kappas[i]->pdgId() << " e: " << kappas[i]->energy() << " eta: " << kappas[i]->eta() << " phi: " << kappas[i]->phi() << " decayed to: " << std::endl;
+
+           // loop again on simtracks to find decay products
+           for(SimTrackContainer::const_iterator iSim = simTracks->begin(); iSim != simTracks->end(); ++iSim) {
+
+             if( iSim->noVertex() ) continue; // ignore prompt particle (vertIndex = -1) 
+
+             if( abs(iSim->vertIndex()) == iVert->vertexId() ) {
+
+               //float e = iSim->momentum().T();
+               float x = iSim->momentum().X();
+               float y = iSim->momentum().Y();
+               float z = iSim->momentum().Z();
+               float p = sqrt( x*x + y*y + z*z );
+               //float mass = sqrt( e*e - p*p );
+               int id = iSim->type();
+               //std::cout << "  " << iSim->type() << " m: " << mass << " e: " << iSim->momentum().T() << " phi: " << iSim->momentum().Phi() << std::endl;
+               //PartLite thisPart;
+               //thisPart.pdgId = id;
+               //thisPart.p = p;
+               //daughters.push_back(thisPart);
+
+               nDaughters++;
+               if( abs(id) == 211 ) nPiCharged++;
+               else if( id == 111 ) nPiNeutral++;
+               else if( id > 1000 ) nBaryons++;
+               else if( abs(id) == 11 ) nElectrons++;
+               else if( abs(id) == 13 ) nMuons++;
+               else if( id == 22 ) nPhotons++;
+
+               if( p<0.15 && fabs(iSim->charge())>0.01 ) nLowP[i]++;
+
+             } // if found vertex
+
+           } // for simtracks
+
+         } // if vertR<60.
+
        } // if found track ID
 
-       ++vertIndex;
-
      } //for sim vertex
+
+     if( nBaryons>0 )                                           decayMode[i] =  0; // nuclear interaction
+     else if( nDaughters==1 && nElectrons==1 )                  decayMode[i] =  1; // e nu (neutrino not tracked)
+     else if( nDaughters==1 && nMuons    ==1 )                  decayMode[i] =  2; // m nu (neutrino not tracked)
+     else if( nDaughters==2 && nElectrons==1 && nPiNeutral==1 ) decayMode[i] =  3; // pi0 e nu
+     else if( nDaughters==2 && nMuons    ==1 && nPiNeutral==1 ) decayMode[i] =  4; // pi0 m nu
+     else if( nDaughters==2 && nPiCharged==1 && nPiNeutral==1 ) decayMode[i] =  5; // pi+ pi0
+     else if( nDaughters==3 && nPiCharged==1 && nPiNeutral==2 ) decayMode[i] =  6; // pi+ pi0 pi0
+     else if( nDaughters==3 && nPiCharged==2 && nPiNeutral==1 ) decayMode[i] =  7; // pi+ pi- pi+
+     else if( nDaughters==3 && nPiCharged==1 && nElectrons==2 ) decayMode[i] =  8; // pi+ e+ e-
+     else if( nDaughters==2 && nMuons    ==1 && nPhotons  ==1 ) decayMode[i] =  9; // mu nu gamma
+     else if( nDaughters==2 && nElectrons==1 && nPhotons  ==1 ) decayMode[i] = 10; // e nu gamma
+     else if( nDaughters==3 && nElectrons==2 && nMuons    ==1 ) decayMode[i] = 11; // m nu e+ e-
+     else if( nDaughters==3 && nElectrons==3 )                  decayMode[i] = 12; // e nu e+ e-
+     else                                                       decayMode[i] = 13; // e nu e+ e-
 
        
    } //for kappa track ID
