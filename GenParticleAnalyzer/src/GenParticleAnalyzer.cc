@@ -331,6 +331,16 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      else if( nDaughters==3 && nElectrons==3 )                  decayMode[i] = 12; // e nu e+ e-
      else if( nDaughters>0  )                                   decayMode[i] = 13; // other
 
+     //if( decayMode[i] == 13 ) {
+     //  std::cout << "nDaughters: " <<  nDaughters << std::endl;
+     //  std::cout << "nPiCharged: " <<  nPiCharged << std::endl;
+     //  std::cout << "nPiNeutral: " <<  nPiNeutral << std::endl;
+     //  std::cout << "nBaryons  : " <<  nBaryons   << std::endl;
+     //  std::cout << "nElectrons: " <<  nElectrons << std::endl;
+     //  std::cout << "nMuons    : " <<  nMuons     << std::endl;
+     //  std::cout << "nPhotons  : " <<  nPhotons   << std::endl;
+     //}
+
        
    } //for kappa track ID
 
