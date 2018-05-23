@@ -315,6 +315,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
      } //for sim vertex
 
+     
      if( nBaryons>0 )                                           decayMode[i] =  0; // nuclear interaction
      else if( nDaughters==1 && nElectrons==1 )                  decayMode[i] =  1; // e nu (neutrino not tracked)
      else if( nDaughters==1 && nMuons    ==1 )                  decayMode[i] =  2; // m nu (neutrino not tracked)
@@ -322,13 +323,13 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      else if( nDaughters==2 && nMuons    ==1 && nPiNeutral==1 ) decayMode[i] =  4; // pi0 m nu
      else if( nDaughters==2 && nPiCharged==1 && nPiNeutral==1 ) decayMode[i] =  5; // pi+ pi0
      else if( nDaughters==3 && nPiCharged==1 && nPiNeutral==2 ) decayMode[i] =  6; // pi+ pi0 pi0
-     else if( nDaughters==3 && nPiCharged==2 && nPiNeutral==1 ) decayMode[i] =  7; // pi+ pi- pi+
+     else if( nDaughters==3 && nPiCharged==3                  ) decayMode[i] =  7; // pi+ pi- pi+
      else if( nDaughters==3 && nPiCharged==1 && nElectrons==2 ) decayMode[i] =  8; // pi+ e+ e-
      else if( nDaughters==2 && nMuons    ==1 && nPhotons  ==1 ) decayMode[i] =  9; // mu nu gamma
      else if( nDaughters==2 && nElectrons==1 && nPhotons  ==1 ) decayMode[i] = 10; // e nu gamma
      else if( nDaughters==3 && nElectrons==2 && nMuons    ==1 ) decayMode[i] = 11; // m nu e+ e-
      else if( nDaughters==3 && nElectrons==3 )                  decayMode[i] = 12; // e nu e+ e-
-     else                                                       decayMode[i] = 13; // e nu e+ e-
+     else if( nDaughters>0  )                                   decayMode[i] = 13; // other
 
        
    } //for kappa track ID
