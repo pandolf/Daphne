@@ -62,23 +62,29 @@
 
 //#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 
+#include "TLorentzVector.h"
+
+
 
 using namespace edm;
 using namespace std;
 using namespace reco;
 
 
-//class PartLite {
-//
-// public:
-//
-//  int pdgId;
-//  float p;
-//
-// private:
-//
-//
-//};
+class PartLite {
+
+ public:
+
+  int pdgId;
+  float pt;
+  float eta;
+  float phi;
+  float m;
+
+ private:
+
+
+};
 
 
 GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
@@ -106,7 +112,14 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("vertR",vertR,"vertR[nMC]/F");
   m_tree->Branch("trkIso",trkIso,"trkIso[nMC]/I");
   m_tree->Branch("nLowP",nLowP,"nLowP[nMC]/I");
+  m_tree->Branch("nCharged",nCharged,"nCharged[nMC]/I");
   m_tree->Branch("decayMode",decayMode,"decayMode[nMC]/I");
+  m_tree->Branch("nDau",nDau,"nDau[nMC]/I");
+  m_tree->Branch("ptDau",ptDau,"ptDau[nMC][nDau]/F");
+  m_tree->Branch("mDau",mDau,"mDau[nMC][nDau]/F");
+  m_tree->Branch("etaDau",etaDau,"etaDau[nMC][nDau]/F");
+  m_tree->Branch("phiDau",phiDau,"phiDau[nMC][nDau]/F");
+  m_tree->Branch("pdgIdDau",pdgIdDau,"pdgIdDau[nMC][nDau]/I");
 
   m_h1_nGoodKappas = fs_->make<TH1D>("nGoodKappas", "", 6, -0.5, 5.5 );
 
@@ -177,7 +190,10 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      vertR[nMC] = -1.;
      trkIso[nMC] = 0;
      nLowP[nMC] = 0;
+     nCharged[nMC] = 0;
      decayMode[nMC] = -1;
+  
+     nDau[nMC] = 0;
 
      const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
 
@@ -245,7 +261,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    for( unsigned int i=0; i<kappa_trackId.size(); ++i ) {
 
-     //std::vector<PartLite> daughters;
+     std::vector<PartLite*> daughters;
      int nDaughters = 0;
      int nPiCharged = 0;
      int nPiNeutral = 0;
@@ -282,20 +298,17 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
              if( abs(iSim->vertIndex()) == iVert->vertexId() ) {
 
-               //float e = iSim->momentum().T();
+               float e = iSim->momentum().T();
                float x = iSim->momentum().X();
                float y = iSim->momentum().Y();
                float z = iSim->momentum().Z();
                float p = sqrt( x*x + y*y + z*z );
                //float mass = sqrt( e*e - p*p );
                int id = iSim->type();
-               //std::cout << "  " << iSim->type() << " m: " << mass << " e: " << iSim->momentum().T() << " phi: " << iSim->momentum().Phi() << std::endl;
-               //PartLite thisPart;
-               //thisPart.pdgId = id;
-               //thisPart.p = p;
-               //daughters.push_back(thisPart);
+               std::cout << "  " << iSim->type() << " m: " << sqrt( e*e - p*p ) << " e: " << iSim->momentum().T() << " phi: " << iSim->momentum().Phi() << std::endl;
 
                nDaughters++;
+               if( fabs(iSim->charge())>0.01 ) nCharged[i]++;
                if( abs(id) == 211 ) nPiCharged++;
                else if( id == 111 ) nPiNeutral++;
                else if( id > 1000 ) nBaryons++;
@@ -304,6 +317,19 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                else if( id == 22 ) nPhotons++;
 
                if( p<0.15 && fabs(iSim->charge())>0.01 ) nLowP[i]++;
+
+               //if( fabs(iSim->charge())>0.01 ) { // save only charged daughters
+                 PartLite* thisPart = new PartLite();
+                 thisPart->pdgId = id;
+                 TLorentzVector thisp(x, y, z, e);
+                 thisPart->pt  = thisp.Pt();
+                 thisPart->eta = thisp.Eta();
+                 thisPart->phi = thisp.Phi();
+                 thisPart->m   = thisp.M();
+                 std::cout << "part:  " << thisPart->pdgId << " m: " << thisPart->m << " pt: " << thisPart->pt << " phi: " << thisPart->phi << std::endl;
+                 daughters.push_back(thisPart);
+               //}
+
 
              } // if found vertex
 
@@ -330,6 +356,28 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      else if( nDaughters==3 && nElectrons==2 && nMuons    ==1 ) decayMode[i] = 11; // m nu e+ e-
      else if( nDaughters==3 && nElectrons==3 )                  decayMode[i] = 12; // e nu e+ e-
      else if( nDaughters>0  )                                   decayMode[i] = 13; // other
+
+
+     //if( (decayMode[i]==0 && daughters.size()==3) || decayMode[i] == 8 || decayMode[i] == 7 ) {
+
+       nDau[i] = daughters.size();
+
+       for( unsigned iD=0; iD<daughters.size(); ++iD ) {
+         
+         ptDau [i][iD] = daughters[iD]->pt;
+         etaDau[i][iD] = daughters[iD]->eta;
+         phiDau[i][iD] = daughters[iD]->phi;
+         mDau  [i][iD] = daughters[iD]->m;
+
+         std::cout << "part2:  " << daughters[iD]->pdgId << " m: " << daughters[iD]->m << " pt: " << daughters[iD]->pt << " phi: " << daughters[iD]->phi << std::endl;
+
+         pdgIdDau[i][iD] = daughters[iD]->pdgId;
+         std::cout << "part3:  " << pdgIdDau[i][iD] << " m: " << mDau[i][iD] << " pt: " << ptDau[i][iD] << " phi: " << phiDau[i][iD] << std::endl;
+
+       } // for daughters
+
+     //} // if interesting decayMode
+     
 
      //if( decayMode[i] == 13 ) {
      //  std::cout << "nDaughters: " <<  nDaughters << std::endl;
