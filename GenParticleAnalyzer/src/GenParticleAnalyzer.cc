@@ -306,7 +306,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                float p = sqrt( x*x + y*y + z*z );
                //float mass = sqrt( e*e - p*p );
                int id = iSim->type();
-               std::cout << "  " << iSim->type() << " m: " << sqrt( e*e - p*p ) << " e: " << iSim->momentum().T() << " phi: " << iSim->momentum().Phi() << std::endl;
+               //std::cout << "  " << iSim->type() << " m: " << sqrt( e*e - p*p ) << " e: " << iSim->momentum().T() << " phi: " << iSim->momentum().Phi() << std::endl;
 
                nDaughters++;
                if( fabs(iSim->charge())>0.01 ) nCharged[i]++;
@@ -327,7 +327,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                  thisPart->eta = thisp.Eta();
                  thisPart->phi = thisp.Phi();
                  thisPart->m   = thisp.M();
-                 std::cout << "part:  " << thisPart->pdgId << " m: " << thisPart->m << " pt: " << thisPart->pt << " phi: " << thisPart->phi << std::endl;
+                 //std::cout << "part:  " << thisPart->pdgId << " m: " << thisPart->m << " pt: " << thisPart->pt << " phi: " << thisPart->phi << std::endl;
                  daughters.push_back(thisPart);
                //}
 
