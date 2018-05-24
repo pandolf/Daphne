@@ -115,11 +115,12 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("nCharged",nCharged,"nCharged[nMC]/I");
   m_tree->Branch("decayMode",decayMode,"decayMode[nMC]/I");
   m_tree->Branch("nDau",nDau,"nDau[nMC]/I");
-  m_tree->Branch("ptDau",ptDau,"ptDau[nMC][nDau]/F");
-  m_tree->Branch("mDau",mDau,"mDau[nMC][nDau]/F");
-  m_tree->Branch("etaDau",etaDau,"etaDau[nMC][nDau]/F");
-  m_tree->Branch("phiDau",phiDau,"phiDau[nMC][nDau]/F");
-  m_tree->Branch("pdgIdDau",pdgIdDau,"pdgIdDau[nMC][nDau]/I");
+  m_tree->Branch("m_ppp",m_ppp,"m_ppp[nMC]/F");
+  //m_tree->Branch("ptDau",ptDau,"ptDau[nMC][nDau]/F");
+  //m_tree->Branch("mDau",mDau,"mDau[nMC][nDau]/F");
+  //m_tree->Branch("etaDau",etaDau,"etaDau[nMC][nDau]/F");
+  //m_tree->Branch("phiDau",phiDau,"phiDau[nMC][nDau]/F");
+  //m_tree->Branch("pdgIdDau",pdgIdDau,"pdgIdDau[nMC][nDau]/I");
 
   m_h1_nGoodKappas = fs_->make<TH1D>("nGoodKappas", "", 6, -0.5, 5.5 );
 
@@ -358,25 +359,32 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      else if( nDaughters>0  )                                   decayMode[i] = 13; // other
 
 
-     //if( (decayMode[i]==0 && daughters.size()==3) || decayMode[i] == 8 || decayMode[i] == 7 ) {
+     if( (decayMode[i]==0 && daughters.size()==3) || decayMode[i] == 8 || decayMode[i] == 7 ) {
 
        nDau[i] = daughters.size();
 
+       TLorentzVector sum_pions(0.,0.,0.,0.);
+
        for( unsigned iD=0; iD<daughters.size(); ++iD ) {
          
-         ptDau [i][iD] = daughters[iD]->pt;
-         etaDau[i][iD] = daughters[iD]->eta;
-         phiDau[i][iD] = daughters[iD]->phi;
-         mDau  [i][iD] = daughters[iD]->m;
+         //ptDau [i][iD] = daughters[iD]->pt;
+         //etaDau[i][iD] = daughters[iD]->eta;
+         //phiDau[i][iD] = daughters[iD]->phi;
+         //mDau  [i][iD] = daughters[iD]->m;
+         //pdgIdDau[i][iD] = daughters[iD]->pdgId;
 
-         std::cout << "part2:  " << daughters[iD]->pdgId << " m: " << daughters[iD]->m << " pt: " << daughters[iD]->pt << " phi: " << daughters[iD]->phi << std::endl;
+         TLorentzVector thisPion;
+         thisPion.SetPtEtaPhiM( daughters[iD]->pt, daughters[iD]->eta, daughters[iD]->phi, 0.140 );
 
-         pdgIdDau[i][iD] = daughters[iD]->pdgId;
-         std::cout << "part3:  " << pdgIdDau[i][iD] << " m: " << mDau[i][iD] << " pt: " << ptDau[i][iD] << " phi: " << phiDau[i][iD] << std::endl;
+         sum_pions += thisPion;
+
+         //std::cout << "part3:  " << pdgIdDau[i][iD] << " m: " << mDau[i][iD] << " pt: " << ptDau[i][iD] << " phi: " << phiDau[i][iD] << std::endl;
 
        } // for daughters
 
-     //} // if interesting decayMode
+       m_ppp[i] = sum_pions.M();
+
+     } // if interesting decayMode
      
 
      //if( decayMode[i] == 13 ) {

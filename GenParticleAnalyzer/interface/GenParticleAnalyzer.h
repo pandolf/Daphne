@@ -67,11 +67,12 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Int_t nCharged[300];
       Int_t decayMode[300];
       Int_t   nDau[300];
-      Float_t ptDau[300][200];
-      Float_t mDau[300][200];
-      Float_t etaDau[300][200];
-      Float_t phiDau[300][200];
-      Float_t pdgIdDau[300][200];
+      Float_t m_ppp[300];
+      //Float_t ptDau[300][100];
+      //Float_t mDau[300][100];
+      //Float_t etaDau[300][100];
+      //Float_t phiDau[300][100];
+      //Float_t pdgIdDau[300][100];
 
       edm::EDGetTokenT<reco::GenParticleCollection> genParticleCollectionToken_;
       edm::EDGetTokenT<edm::SimTrackContainer > simTrackContainerToken_;
