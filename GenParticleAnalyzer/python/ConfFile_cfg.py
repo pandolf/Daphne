@@ -30,7 +30,7 @@ process.demo = cms.EDAnalyzer('GenParticleAnalyzer'
 )
 
 process.TFileService = cms.Service("TFileService",
-      fileName = cms.string('genTree.root')
+      fileName = cms.string('genTree.root'),
       closeFileFast = cms.untracked.bool(True)
 )
 
