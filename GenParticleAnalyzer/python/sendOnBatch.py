@@ -63,7 +63,7 @@ while (len(inputfiles) > 0):
     outputfile.write('export SCRAM_ARCH=slc6_amd64_gcc630\n')
     outputfile.write('cd /afs/cern.ch/work/p/pandolf/CMSSW_9_4_1_CMG/src/; eval `scramv1 runtime -sh` ; cd -\n')
     outputfile.write('cd $WORKDIR\n')
-    outputfile.write('cp /afs/cern.ch/work/p/pandolf/CMSSW_9_4_1_CMG/src/Dafne/GenParticleAnalyzer/python/X509_USER_PROXY $WORKDIR\n')
+    outputfile.write('cp /afs/cern.ch/work/p/pandolf/CMSSW_9_4_1_CMG/src/Daphne/GenParticleAnalyzer/python/X509_USER_PROXY $WORKDIR\n')
     outputfile.write('export X509_USER_PROXY=$WORKDIR/X509_USER_PROXY\n')
     outputfile.write('cmsRun '+pwd+'/'+cfgname+'\n')
     outputfile.write('cp '+outfile+' '+eosdir+'\n')
