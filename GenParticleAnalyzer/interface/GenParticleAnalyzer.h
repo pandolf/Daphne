@@ -13,6 +13,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
+#include "TLorentzVector.h"
 
 
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
@@ -30,6 +31,8 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
    public:
       explicit GenParticleAnalyzer(const edm::ParameterSet&);
       ~GenParticleAnalyzer();
+
+      float computeMass( const std::vector<TLorentzVector>& pions, int index_ele=-1 );
 
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -67,7 +70,30 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Int_t nCharged[300];
       Int_t decayMode[300];
       Int_t   nDau[300];
+
       Float_t m_ppp[300];
+      Float_t m_pee0[300];
+      Float_t m_pee1[300];
+      Float_t m_pee2[300];
+      
+      Float_t ptDau0[300];
+      Float_t mDau0[300];
+      Float_t etaDau0[300];
+      Float_t phiDau0[300];
+      Float_t pdgIdDau0[300];
+
+      Float_t ptDau1[300];
+      Float_t mDau1[300];
+      Float_t etaDau1[300];
+      Float_t phiDau1[300];
+      Float_t pdgIdDau1[300];
+
+      Float_t ptDau2[300];
+      Float_t mDau2[300];
+      Float_t etaDau2[300];
+      Float_t phiDau2[300];
+      Float_t pdgIdDau2[300];
+
       //Float_t ptDau[300][100];
       //Float_t mDau[300][100];
       //Float_t etaDau[300][100];

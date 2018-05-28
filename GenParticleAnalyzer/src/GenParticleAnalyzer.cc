@@ -115,7 +115,31 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("nCharged",nCharged,"nCharged[nMC]/I");
   m_tree->Branch("decayMode",decayMode,"decayMode[nMC]/I");
   m_tree->Branch("nDau",nDau,"nDau[nMC]/I");
+
   m_tree->Branch("m_ppp",m_ppp,"m_ppp[nMC]/F");
+
+  m_tree->Branch("m_pee0",m_pee0,"m_pee0[nMC]/F");
+  m_tree->Branch("m_pee1",m_pee1,"m_pee1[nMC]/F");
+  m_tree->Branch("m_pee2",m_pee2,"m_pee2[nMC]/F");
+
+  m_tree->Branch("ptDau0",ptDau0,"ptDau0[nMC]/F");
+  m_tree->Branch("mDau0",mDau0,"mDau0[nMC]/F");
+  m_tree->Branch("etaDau0",etaDau0,"etaDau0[nMC]/F");
+  m_tree->Branch("phiDau0",phiDau0,"phiDau0[nMC]/F");
+  m_tree->Branch("pdgIdDau0",pdgIdDau0,"pdgIdDau0[nMC]/I");
+
+  m_tree->Branch("ptDau1",ptDau1,"ptDau1[nMC]/F");
+  m_tree->Branch("mDau1",mDau1,"mDau1[nMC]/F");
+  m_tree->Branch("etaDau1",etaDau1,"etaDau1[nMC]/F");
+  m_tree->Branch("phiDau1",phiDau1,"phiDau1[nMC]/F");
+  m_tree->Branch("pdgIdDau1",pdgIdDau1,"pdgIdDau1[nMC]/I");
+
+  m_tree->Branch("ptDau2",ptDau2,"ptDau2[nMC]/F");
+  m_tree->Branch("mDau2",mDau2,"mDau2[nMC]/F");
+  m_tree->Branch("etaDau2",etaDau2,"etaDau2[nMC]/F");
+  m_tree->Branch("phiDau2",phiDau2,"phiDau2[nMC]/F");
+  m_tree->Branch("pdgIdDau2",pdgIdDau2,"pdgIdDau2[nMC]/I");
+
   //m_tree->Branch("ptDau",ptDau,"ptDau[nMC][nDau]/F");
   //m_tree->Branch("mDau",mDau,"mDau[nMC][nDau]/F");
   //m_tree->Branch("etaDau",etaDau,"etaDau[nMC][nDau]/F");
@@ -359,13 +383,15 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      else if( nDaughters>0  )                                   decayMode[i] = 13; // other
 
 
-     if( (decayMode[i]==0 && daughters.size()==3) || decayMode[i] == 8 || decayMode[i] == 7 ) {
+     if( (decayMode[i]==0 && (daughters.size()==3 || daughters.size()==4)) || decayMode[i] == 8 || decayMode[i] == 7 ) {
 
        nDau[i] = daughters.size();
 
-       TLorentzVector sum_pions(0.,0.,0.,0.);
+       float m_pi = 0.1396;
 
-       for( unsigned iD=0; iD<daughters.size(); ++iD ) {
+       std::vector<TLorentzVector> pions;
+
+       for( unsigned iD=0; iD<3; ++iD ) { // take three also in the case of 4 daughters (decayMode=0)
          
          //ptDau [i][iD] = daughters[iD]->pt;
          //etaDau[i][iD] = daughters[iD]->eta;
@@ -374,15 +400,16 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          //pdgIdDau[i][iD] = daughters[iD]->pdgId;
 
          TLorentzVector thisPion;
-         thisPion.SetPtEtaPhiM( daughters[iD]->pt, daughters[iD]->eta, daughters[iD]->phi, 0.140 );
+         thisPion.SetPtEtaPhiM( daughters[iD]->pt, daughters[iD]->eta, daughters[iD]->phi, m_pi );
 
-         sum_pions += thisPion;
-
-         //std::cout << "part3:  " << pdgIdDau[i][iD] << " m: " << mDau[i][iD] << " pt: " << ptDau[i][iD] << " phi: " << phiDau[i][iD] << std::endl;
+         pions.push_back(thisPion);
 
        } // for daughters
 
-       m_ppp[i] = sum_pions.M();
+       m_ppp [i] = computeMass( pions );
+       m_pee0[i] = computeMass( pions, 0 );
+       m_pee1[i] = computeMass( pions, 1 );
+       m_pee2[i] = computeMass( pions, 2 );
 
      } // if interesting decayMode
      
@@ -422,6 +449,36 @@ GenParticleAnalyzer::endJob() {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+
+
+float GenParticleAnalyzer::computeMass( const std::vector<TLorentzVector>& pions, int index_ele ) {
+
+  float m_ele = 0.000511;
+  TLorentzVector sum(0.,0.,0.,0.);
+
+  for( int i=0; i<(int)pions.size(); ++i ) {
+
+    if( i==index_ele ) {
+
+      TLorentzVector ele;
+      ele.SetPtEtaPhiM( pions[i].Pt(), pions[i].Eta(), pions[i].Phi(), m_ele );
+
+      sum += ele;
+
+    } else {
+
+      sum += pions[i];
+
+    }
+
+  } // for pions
+
+  return sum.M();
+
+}
+
+
+
 void
 GenParticleAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
