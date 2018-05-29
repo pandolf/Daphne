@@ -393,12 +393,6 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        for( unsigned iD=0; iD<3; ++iD ) { // take three also in the case of 4 daughters (decayMode=0)
          
-         //ptDau [i][iD] = daughters[iD]->pt;
-         //etaDau[i][iD] = daughters[iD]->eta;
-         //phiDau[i][iD] = daughters[iD]->phi;
-         //mDau  [i][iD] = daughters[iD]->m;
-         //pdgIdDau[i][iD] = daughters[iD]->pdgId;
-
          TLorentzVector thisPion;
          thisPion.SetPtEtaPhiM( daughters[iD]->pt, daughters[iD]->eta, daughters[iD]->phi, m_pi );
 
@@ -410,6 +404,26 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        m_pee0[i] = computeMass( pions, 0 );
        m_pee1[i] = computeMass( pions, 1 );
        m_pee2[i] = computeMass( pions, 2 );
+       
+
+       ptDau0   [i] = daughters[0]->pt;
+       etaDau0  [i] = daughters[0]->eta;
+       phiDau0  [i] = daughters[0]->phi;
+       mDau0    [i] = daughters[0]->m;
+       pdgIdDau0[i] = daughters[0]->pdgId;
+
+       ptDau1   [i] = daughters[1]->pt;
+       etaDau1  [i] = daughters[1]->eta;
+       phiDau1  [i] = daughters[1]->phi;
+       mDau1    [i] = daughters[1]->m;
+       pdgIdDau1[i] = daughters[1]->pdgId;
+
+       ptDau2   [i] = daughters[2]->pt;
+       etaDau2  [i] = daughters[2]->eta;
+       phiDau2  [i] = daughters[2]->phi;
+       mDau2    [i] = daughters[2]->m;
+       pdgIdDau2[i] = daughters[2]->pdgId;
+
 
      } // if interesting decayMode
      
