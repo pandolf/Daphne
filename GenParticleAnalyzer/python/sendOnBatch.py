@@ -20,7 +20,8 @@ queue = "8nh"
 
 pwd = os.environ['PWD']
 
-eosdir = "/eos/cms/store/user/pandolf/Dafne/GenAnalysis/" + prodName + "/" + dataset
+eosdir = "/eos/cms/store/group/phys_higgs/pandolf/Dafne/GenAnalysis/" + prodName + "/" + dataset
+#eosdir = "/eos/cms/store/user/pandolf/Dafne/GenAnalysis/" + prodName + "/" + dataset
 os.system("eos mkdir " + eosdir) 
 
 dir = "prod_" + prodName + "/" + dataset
