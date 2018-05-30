@@ -17,4 +17,8 @@ genTreeAnalyzer: genTreeAnalyzer.cpp
 	$(CC) -Wall $(INCLUDES) -o genTreeAnalyzer genTreeAnalyzer.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 
+genTreeMerger: genTreeMerger.cpp 
+	$(CC) -Wall $(INCLUDES) -o genTreeMerger genTreeMerger.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+
 
