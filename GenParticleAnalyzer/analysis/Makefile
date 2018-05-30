@@ -21,4 +21,10 @@ genTreeMerger: genTreeMerger.cpp
 	$(CC) -Wall $(INCLUDES) -o genTreeMerger genTreeMerger.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 
+drawGenTree: drawGenTree.cpp 
+	$(CC) -Wall $(INCLUDES) -o drawGenTree drawGenTree.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+
+DaphneCommon.o: ../src/DaphneCommon.cc
+	$(CC) -Wall $(INCLUDES) -c ../src/DaphneCommon.cc $(ROOTFLAG) $(EXTRALIBS)
 
