@@ -11,5 +11,5 @@ prodName = sys.argv[1]
 
 
 os.system('source /afs/cern.ch/work/p/pandolf/CMSSW_9_4_1_CMG/src/Daphne/GenParticleAnalyzer/python/setAAA.sh')
-os.system('eos mkdir /eos/cms/store/group/phys_higgs/pandolf/Dafne/GenAnalysis/'+prodName)
+os.system('eos mkdir /eos/cms/store/group/phys_higgs/pandolf/Daphne/GenAnalysis/'+prodName)
 os.system('python sendOnBatch.py '+prodName+' QCD_Pt_15to30 2')
