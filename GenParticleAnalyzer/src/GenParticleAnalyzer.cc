@@ -472,7 +472,7 @@ float GenParticleAnalyzer::computeMass( const std::vector<TLorentzVector>& pions
 
   for( int i=0; i<(int)pions.size(); ++i ) {
 
-    if( i==index_ele ) {
+    if( index_ele>=0 && i!=index_ele ) {
 
       TLorentzVector ele;
       ele.SetPtEtaPhiM( pions[i].Pt(), pions[i].Eta(), pions[i].Phi(), m_ele );
