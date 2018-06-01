@@ -194,45 +194,50 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    /// get MC info from GenParticleCandidates 
 
    std::vector< const GenParticle* > trackedParticles;
-   std::vector<PartLite*> daughters;
+   //std::vector<int> delta_indexes;
 
    int nGoodKappas=0;
+   int index=0;
 
+   //std::cout << "ISPROMPT:    PDGID:    MOM_PDGID:" << std::endl;
    for ( GenParticleCollection::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p ) {
 
      if( nMC==300 ) break;
 
-     if( abs(p->pdgId())!=321 && p->pdgId()!=2214 && p->pdgId()!=1114 ) continue; // K+/-, Delta+, Delta-
+     //if( p->mother()!=0 )
+     //  std::cout << p->isPromptFinalState() << " " <<  p->pdgId() << " " << p->mother()->pdgId() << " " << std::endl;
+     //else
+     //  std::cout << p->isPromptFinalState() << " " <<  p->pdgId() << "  no MOM" << " " << std::endl;
+     if( abs(p->pdgId())==321 || abs(p->pdgId())==2224 || abs(p->pdgId())==2214 || abs(p->pdgId())==2114 || abs(p->pdgId())==1114  ) { // K+/-, Delta++, Delta+, Delta0, Delta-
 
-     pdgIdMC[nMC] = p->pdgId();
-     statusMC[nMC] = p->status();
-     massMC[nMC] = p->mass();
-     ptMC[nMC] = sqrt( p->px()*p->px() + p->py()*p->py() );
-     pzMC[nMC] = p->pz();
-     pMC[nMC] = sqrt( pzMC[nMC]*pzMC[nMC] + ptMC[nMC]*ptMC[nMC] );
-     eMC[nMC] = p->energy();
-     etaMC[nMC] = p->eta();
-     phiMC[nMC] = p->phi();
+       pdgIdMC[nMC] = p->pdgId();
+       statusMC[nMC] = p->status();
+       massMC[nMC] = p->mass();
+       ptMC[nMC] = sqrt( p->px()*p->px() + p->py()*p->py() );
+       pzMC[nMC] = p->pz();
+       pMC[nMC] = sqrt( pzMC[nMC]*pzMC[nMC] + ptMC[nMC]*ptMC[nMC] );
+       eMC[nMC] = p->energy();
+       etaMC[nMC] = p->eta();
+       phiMC[nMC] = p->phi();
 
-     vertR[nMC] = -1.;
-     trkIso[nMC] = 0;
-     nLowP[nMC] = 0;
-     nCharged[nMC] = 0;
-     decayMode[nMC] = -1;
-  
-     nDau[nMC] = 0;
+       vertR[nMC] = -1.;
+       trkIso[nMC] = 0;
+       nLowP[nMC] = 0;
+       nCharged[nMC] = 0;
+       decayMode[nMC] = -1;
+    
+       nDau[nMC] = 0;
 
-     const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
-     trackedParticles.push_back( thisGenP );
+       const GenParticle* thisGenP =  (const GenParticle*)(&(*p));
+       trackedParticles.push_back( thisGenP );
 
-     //( abs(p->pdgId())==321 )
-     //kappas.push_back( thisGenP );
+       //if( p->pdgId()== 2214 || p->pdgId()== 1114 ) delta_indexes.push_back(index);
 
-     //( p->pdgId()== 2214 || p->pdgId()== 1114 ) {
+       nMC++;
 
-     //deltas.push_back( thisGenP );
+     } // if K or delta
 
-     nMC++;
+     index++;
 
    }
    
@@ -292,14 +297,16 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-   // look for sim vertex:
+   // save daughters
 
    for( unsigned int i=0; i<trackedParticles.size(); ++i ) {
 
 
-     // kappas first
+     // kappas first (here we need to go through the simvertex)
+
      if( abs(trackedParticles[i]->pdgId()) == 321 ) {
 
+       std::vector<PartLite*> daughtersK;
        int nDaughters = 0;
        int nPiCharged = 0;
        int nPiNeutral = 0;
@@ -368,7 +375,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                    thisPart->phi = thisp.Phi();
                    thisPart->m   = thisp.M();
                    //std::cout << "part:  " << thisPart->pdgId << " m: " << thisPart->m << " pt: " << thisPart->pt << " phi: " << thisPart->phi << std::endl;
-                   daughters.push_back(thisPart);
+                   daughtersK.push_back(thisPart);
                  //}
 
 
@@ -399,9 +406,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        else if( nDaughters>0  )                                   decayMode[i] = 13; // other
 
 
-       if( (decayMode[i]==0 && (daughters.size()==3 || daughters.size()==4)) || decayMode[i] == 8 || decayMode[i] == 7 ) {
+       if( (decayMode[i]==0 && (daughtersK.size()==3 || daughtersK.size()==4)) || decayMode[i] == 8 || decayMode[i] == 7 ) {
 
-         nDau[i] = daughters.size();
+         nDau[i] = daughtersK.size();
 
          float m_pi = 0.1396;
 
@@ -410,7 +417,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          for( unsigned iD=0; iD<3; ++iD ) { // take three also in the case of 4 daughters (decayMode=0)
            
            TLorentzVector thisPion;
-           thisPion.SetPtEtaPhiM( daughters[iD]->pt, daughters[iD]->eta, daughters[iD]->phi, m_pi );
+           thisPion.SetPtEtaPhiM( daughtersK[iD]->pt, daughtersK[iD]->eta, daughtersK[iD]->phi, m_pi );
 
            pions.push_back(thisPion);
 
@@ -422,23 +429,23 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          m_pee2[i] = computeMass( pions, 2 );
          
 
-         ptDau0   [i] = daughters[0]->pt;
-         etaDau0  [i] = daughters[0]->eta;
-         phiDau0  [i] = daughters[0]->phi;
-         mDau0    [i] = daughters[0]->m;
-         pdgIdDau0[i] = daughters[0]->pdgId;
+         ptDau0   [i] = daughtersK[0]->pt;
+         etaDau0  [i] = daughtersK[0]->eta;
+         phiDau0  [i] = daughtersK[0]->phi;
+         mDau0    [i] = daughtersK[0]->m;
+         pdgIdDau0[i] = daughtersK[0]->pdgId;
 
-         ptDau1   [i] = daughters[1]->pt;
-         etaDau1  [i] = daughters[1]->eta;
-         phiDau1  [i] = daughters[1]->phi;
-         mDau1    [i] = daughters[1]->m;
-         pdgIdDau1[i] = daughters[1]->pdgId;
+         ptDau1   [i] = daughtersK[1]->pt;
+         etaDau1  [i] = daughtersK[1]->eta;
+         phiDau1  [i] = daughtersK[1]->phi;
+         mDau1    [i] = daughtersK[1]->m;
+         pdgIdDau1[i] = daughtersK[1]->pdgId;
 
-         ptDau2   [i] = daughters[2]->pt;
-         etaDau2  [i] = daughters[2]->eta;
-         phiDau2  [i] = daughters[2]->phi;
-         mDau2    [i] = daughters[2]->m;
-         pdgIdDau2[i] = daughters[2]->pdgId;
+         ptDau2   [i] = daughtersK[2]->pt;
+         etaDau2  [i] = daughtersK[2]->eta;
+         phiDau2  [i] = daughtersK[2]->phi;
+         mDau2    [i] = daughtersK[2]->m;
+         pdgIdDau2[i] = daughtersK[2]->pdgId;
 
 
        } // if interesting decayMode
@@ -455,62 +462,73 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        
 
-     // and now deltas
+     // and now deltas (here it's easier, we can use the genparticles)
      
-     } else if( trackedParticles[i]->pdgId()==2214 || trackedParticles[i]->pdgId()==1114 ) {
-       
+     } else if( abs(trackedParticles[i]->pdgId())==2224 || abs(trackedParticles[i]->pdgId())==2214 || abs(trackedParticles[i]->pdgId())==2114 || abs(trackedParticles[i]->pdgId())==1114  ) { 
+
+       std::vector<PartLite*> daughtersD;
      
        // second loop to find daughters
        for( GenParticleCollection::const_iterator p2 = genParticles->begin(); p2 != genParticles->end(); ++p2 ) { 
 
-         if( &(*p2) == trackedParticles[i] ) continue;
+         //if( &(*p2) == trackedParticles[i] ) continue;
+         if( p2->mother()==0 ) continue;
+         if( p2->mother()->pdgId()  !=  trackedParticles[i]->pdgId() ) continue;
 
-         if( p2->mother() == trackedParticles[i] ) {
+         if( p2->mother()->pdgId()  == trackedParticles[i]->pdgId()  &&
+             p2->mother()->energy() == trackedParticles[i]->energy() &&
+             p2->mother()->px()     == trackedParticles[i]->px()     &&
+             p2->mother()->py()     == trackedParticles[i]->py()     &&
+             p2->mother()->pz()     == trackedParticles[i]->pz()     ) {
 
            PartLite* thisPart = new PartLite();
-           thisPart->pdgId = trackedParticles[i]->pdgId();
-           float x = trackedParticles[i]->px();
-           float y = trackedParticles[i]->py();
-           float z = trackedParticles[i]->pz();
-           float e = trackedParticles[i]->energy();
+           thisPart->pdgId = p2->pdgId();
+           float x = p2->px();
+           float y = p2->py();
+           float z = p2->pz();
+           float e = p2->energy();
            TLorentzVector thisp(x, y, z, e);
            thisPart->pt  = thisp.Pt();
            thisPart->eta = thisp.Eta();
            thisPart->phi = thisp.Phi();
            thisPart->m   = thisp.M();
 
-           daughters.push_back(thisPart);
+           daughtersD.push_back(thisPart);
 
          }  // if found mother
 
        } // second loop to find daughters
        
 
-       if( daughters.size()==2 ) {
-         if(      abs(daughters[0]->pdgId * daughters[1]->pdgId) == 466732 ) decayMode[i]=1000; // proton=2212, pi=211
-         else if( abs(daughters[0]->pdgId * daughters[1]->pdgId) == 48664  ) decayMode[i]=1001; // proton=2212, photon=22
+       if( daughtersD.size()==2 ) {
+         if(      abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 466732    ) decayMode[i]=1000; // p pi+-   (proton=2212, pi=211)
+         else if( abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 48664     ) decayMode[i]=1001; // p gamma  (proton=2212, photon=22)
+         else if( abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 245532    ) decayMode[i]=1002; // p pi0    (proton=2212, pizero=111)
+         else if( abs(daughtersD[0]->pdgId)==2112 ||  abs(daughtersD[1]->pdgId) ) decayMode[i]=1002; // n X      (neutron=2112) 
          else {
            std::cout << "Unexpected decay mode!!" << std::endl;
-           std::cout << "  " << daughters[0]->pdgId << " " << daughters[1]->pdgId << std::endl;
+           std::cout << "  " << daughtersD[0]->pdgId << " " << daughtersD[1]->pdgId << std::endl;
          }
        } else {
          std::cout << "Delta decaying to N!=2 particles??" << std::endl;
-         for( unsigned iD=0; iD<daughters.size(); ++iD ) {
-           std::cout << "   " << daughters[iD]->pdgId << std::endl;
+         for( unsigned iD=0; iD<daughtersD.size(); ++iD ) {
+           std::cout << "   " << daughtersD[iD]->pdgId << std::endl;
          }
        }
 
-       ptDau0   [i] = daughters[0]->pt;
-       etaDau0  [i] = daughters[0]->eta;
-       phiDau0  [i] = daughters[0]->phi;
-       mDau0    [i] = daughters[0]->m;
-       pdgIdDau0[i] = daughters[0]->pdgId;
+       nDau[i] = daughtersD.size();
 
-       ptDau1   [i] = daughters[1]->pt;
-       etaDau1  [i] = daughters[1]->eta;
-       phiDau1  [i] = daughters[1]->phi;
-       mDau1    [i] = daughters[1]->m;
-       pdgIdDau1[i] = daughters[1]->pdgId;
+       ptDau0   [i] = daughtersD[0]->pt;
+       etaDau0  [i] = daughtersD[0]->eta;
+       phiDau0  [i] = daughtersD[0]->phi;
+       mDau0    [i] = daughtersD[0]->m;
+       pdgIdDau0[i] = daughtersD[0]->pdgId;
+
+       ptDau1   [i] = daughtersD[1]->pt;
+       etaDau1  [i] = daughtersD[1]->eta;
+       phiDau1  [i] = daughtersD[1]->phi;
+       mDau1    [i] = daughtersD[1]->m;
+       pdgIdDau1[i] = daughtersD[1]->pdgId;
 
        ptDau2   [i] = 0.;
        etaDau2  [i] = 1000.;
