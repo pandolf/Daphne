@@ -504,7 +504,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          if(      abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 466732    ) decayMode[i]=1000; // p pi+-   (proton=2212, pi=211)
          else if( abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 48664     ) decayMode[i]=1001; // p gamma  (proton=2212, photon=22)
          else if( abs(daughtersD[0]->pdgId * daughtersD[1]->pdgId) == 245532    ) decayMode[i]=1002; // p pi0    (proton=2212, pizero=111)
-         else if( abs(daughtersD[0]->pdgId)==2112 ||  abs(daughtersD[1]->pdgId) ) decayMode[i]=1002; // n X      (neutron=2112) 
+         else if( abs(daughtersD[0]->pdgId)==2112 ||  abs(daughtersD[1]->pdgId) ) decayMode[i]=1003; // n X      (neutron=2112) 
          else {
            std::cout << "Unexpected decay mode!!" << std::endl;
            std::cout << "  " << daughtersD[0]->pdgId << " " << daughtersD[1]->pdgId << std::endl;
