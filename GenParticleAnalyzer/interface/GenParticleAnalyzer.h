@@ -80,19 +80,19 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Float_t mDau0[300];
       Float_t etaDau0[300];
       Float_t phiDau0[300];
-      Float_t pdgIdDau0[300];
+      Int_t   pdgIdDau0[300];
 
       Float_t ptDau1[300];
       Float_t mDau1[300];
       Float_t etaDau1[300];
       Float_t phiDau1[300];
-      Float_t pdgIdDau1[300];
+      Int_t   pdgIdDau1[300];
 
       Float_t ptDau2[300];
       Float_t mDau2[300];
       Float_t etaDau2[300];
       Float_t phiDau2[300];
-      Float_t pdgIdDau2[300];
+      Int_t   pdgIdDau2[300];
 
       //Float_t ptDau[300][100];
       //Float_t mDau[300][100];
