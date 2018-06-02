@@ -180,6 +180,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    nMC = 0;
 
        
+   nTrackable = 0;
    nTrackableProtons = 0;
    nTrackableProtons_dEdx = 0;
    nTrackableProtonsFromDelta = 0;
