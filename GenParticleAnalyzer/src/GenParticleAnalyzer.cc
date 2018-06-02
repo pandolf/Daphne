@@ -140,6 +140,12 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("phiDau2",phiDau2,"phiDau2[nMC]/F");
   m_tree->Branch("pdgIdDau2",pdgIdDau2,"pdgIdDau2[nMC]/I");
 
+  m_tree->Branch("nTrackable"                     , &nTrackable                     , "nTrackable/I"                      );
+  m_tree->Branch("nTrackableProtons"              , &nTrackableProtons              , "nTrackableProtons/I"               );
+  m_tree->Branch("nTrackableProtons_dEdx"         , &nTrackableProtons_dEdx         , "nTrackableProtons_dEdx/I"          );
+  m_tree->Branch("nTrackableProtonsFromDelta"     , &nTrackableProtonsFromDelta     , "nTrackableProtonsFromDelta/I"      );
+  m_tree->Branch("nTrackableProtonsFromDelta_dEdx", &nTrackableProtonsFromDelta_dEdx, "nTrackableProtonsFromDelta_dEdx/I" );
+
   //m_tree->Branch("ptDau",ptDau,"ptDau[nMC][nDau]/F");
   //m_tree->Branch("mDau",mDau,"mDau[nMC][nDau]/F");
   //m_tree->Branch("etaDau",etaDau,"etaDau[nMC][nDau]/F");
@@ -173,6 +179,11 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    nMC = 0;
 
+       
+   nTrackableProtons = 0;
+   nTrackableProtons_dEdx = 0;
+   nTrackableProtonsFromDelta = 0;
+   nTrackableProtonsFromDelta_dEdx = 0;
 
    //Handle<GenEventInfoProduct> genEventInfo; 
    //iEvent.getByLabel( "generator", genEventInfo ); 
@@ -204,16 +215,30 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
      if( nMC==300 ) break;
 
+     float pt = sqrt( p->px()*p->px() + p->py()*p->py() );
+     bool isTrackable = (pt>0.5 && abs(p->eta()<2.4));
+
+     if( abs(p->pdgId())==321 || abs(p->pdgId())==211 || (abs(p->pdgId())==2212 && p->mother()!=0) ) {
+       if( isTrackable ) nTrackable++;
+     }
+
      //if( p->mother()!=0 )
      //  std::cout << p->isPromptFinalState() << " " <<  p->pdgId() << " " << p->mother()->pdgId() << " " << std::endl;
      //else
      //  std::cout << p->isPromptFinalState() << " " <<  p->pdgId() << "  no MOM" << " " << std::endl;
-     if( abs(p->pdgId())==321 || abs(p->pdgId())==2224 || abs(p->pdgId())==2214 || abs(p->pdgId())==2114 || abs(p->pdgId())==1114  ) { // K+/-, Delta++, Delta+, Delta0, Delta-
+     if( abs(p->pdgId())==321  || // K+/-
+         abs(p->pdgId())==2224 || // Delta++
+         abs(p->pdgId())==2214 || // Delta+
+         abs(p->pdgId())==2114 || // Delta0
+         abs(p->pdgId())==1114 || // Delta-
+         abs(p->pdgId())==3222 || // Sigma+
+         abs(p->pdgId())==3112    // Sigma-
+       ) { // K+/-, Delta++, Delta+, Delta0, Delta-
 
        pdgIdMC[nMC] = p->pdgId();
        statusMC[nMC] = p->status();
        massMC[nMC] = p->mass();
-       ptMC[nMC] = sqrt( p->px()*p->px() + p->py()*p->py() );
+       ptMC[nMC] = pt;
        pzMC[nMC] = p->pz();
        pMC[nMC] = sqrt( pzMC[nMC]*pzMC[nMC] + ptMC[nMC]*ptMC[nMC] );
        eMC[nMC] = p->energy();
@@ -235,11 +260,34 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        nMC++;
 
-     } // if K or delta
+     } else if( abs(p->pdgId())==2212 ) {  // protons
+
+       float pp = sqrt( pt*pt + p->pz()*p->pz() );
+       bool is_dEdx = pp>0.1 && pp<1.7;
+
+       if( isTrackable ) {
+          
+         nTrackableProtons++;
+       
+         int momID = (p->mother()!=0) ? p->mother()->pdgId() : 0;
+
+         if( abs(momID)==2224 || abs(momID)==2214 || abs(momID)==2114 || abs(momID)==1114 ) {
+
+           nTrackableProtonsFromDelta++;
+
+           if( is_dEdx ) nTrackableProtonsFromDelta_dEdx++;
+
+         } 
+
+         if( is_dEdx ) nTrackableProtons_dEdx++;
+  
+       }  // if trackable
+
+     }  // if protons
 
      index++;
 
-   }
+   } // for genparticles
    
 
    for( unsigned i=0; i<trackedParticles.size(); ++i ) {
@@ -268,28 +316,31 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-   std::vector<int> kappa_trackId;
+   std::vector<int> simTrackId;
 
    for( unsigned int i=0; i<trackedParticles.size(); ++i ) {
 
-     kappa_trackId.push_back(-1);
+     simTrackId.push_back(-1);
 
-     if( abs(trackedParticles[i]->pdgId())!=321 ) continue;
+     if( abs(trackedParticles[i]->pdgId()) != 321  && // K+- 
+         abs(trackedParticles[i]->pdgId()) != 3222 && // Sigma+
+         abs(trackedParticles[i]->pdgId()) != 3112    // Sigma-
+         ) continue;
 
      for(SimTrackContainer::const_iterator iSim = simTracks->begin(); iSim != simTracks->end(); ++iSim) {
 
        if(iSim->genpartIndex() != -1) {
 
-        const reco::Candidate* p = &(*genParticles)[iSim->genpartIndex()-1];
+         const reco::Candidate* p = &(*genParticles)[iSim->genpartIndex()-1];
 
-        if( (trackedParticles[i]->pdgId() != p->pdgId()) ||
-            (trackedParticles[i]->eta() != p->eta()) ||
-            (trackedParticles[i]->phi() != p->phi()) ||
-            (trackedParticles[i]->energy() != p->energy()) ) continue;
-            
-          kappa_trackId[i] = iSim->trackId();
+         if( (trackedParticles[i]->pdgId()  != p->pdgId()) ||
+             (trackedParticles[i]->eta()    != p->eta())   ||
+             (trackedParticles[i]->phi()    != p->phi())   ||
+             (trackedParticles[i]->energy() != p->energy()) ) continue;
+             
+         simTrackId[i] = iSim->trackId();
 
-        } //if genpartindex
+       } //if genpartindex
 
      } //for sim tracks
 
@@ -318,7 +369,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        for(SimVertexContainer::const_iterator iVert = simVertices->begin(); iVert != simVertices->end(); ++iVert) {
 
-         if( kappa_trackId[i] == iVert->parentIndex() ) {
+         if( simTrackId[i] == iVert->parentIndex() ) {
 
            Float_t vertX = iVert->position().x();
            Float_t vertY = iVert->position().y();
@@ -534,7 +585,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        etaDau2  [i] = 1000.;
        phiDau2  [i] = 0.;
        mDau2    [i] = 0.;
-       pdgIdDau2[i] = 0.;
+       pdgIdDau2[i] = 0;
 
      } // if deltas
 
