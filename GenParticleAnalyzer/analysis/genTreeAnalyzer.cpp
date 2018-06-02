@@ -103,7 +103,7 @@ int main( int argc, char* argv[]) {
   tree->SetBranchAddress( "pdgIdDau2", pdgIdDau2 );
 
 
-  TFile* outfile = TFile::Open( "histos.root", "RECREATE" );
+  TFile* outfile = TFile::Open( Form("%s/%s/histos.root", prodName.c_str(), dataset.c_str()), "RECREATE" );
   outfile->cd();
 
   TH1D* h1_cutflow = new TH1D( "cutflow", "", 6, -0.5, 5.5 );
@@ -128,7 +128,6 @@ int main( int argc, char* argv[]) {
   int nGoodEtaVertP_peeLowP=0;
 
   int nentries = tree->GetEntries();
-nentries = 100000;
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
@@ -170,11 +169,11 @@ nentries = 100000;
 
               if( decayMode[i]==0 ) { // nuclear interactions
 
-                h1_mPPP_d8->Fill( m_ppp [i] );
+                h1_mPPP_d0->Fill( m_ppp [i] );
 
-                h1_mPEE_d8->Fill( m_pee0[i] );
-                h1_mPEE_d8->Fill( m_pee1[i] );
-                h1_mPEE_d8->Fill( m_pee2[i] );
+                h1_mPEE_d0->Fill( m_pee0[i] );
+                h1_mPEE_d0->Fill( m_pee1[i] );
+                h1_mPEE_d0->Fill( m_pee2[i] );
 
               } else if( decayMode[i]==7 ) { // pi+ pi- pi+
 
