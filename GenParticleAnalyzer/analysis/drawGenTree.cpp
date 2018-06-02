@@ -29,6 +29,12 @@ int main( int argc, char* argv[]) {
 
   int nMC;
   tree->SetBranchAddress( "nMC", &nMC );
+  float vertR[300];
+  tree->SetBranchAddress( "vertR", vertR );
+  float pMC[300];
+  tree->SetBranchAddress( "pMC", pMC );
+  float etaMC[300];
+  tree->SetBranchAddress( "etaMC", etaMC );
   int decayMode[300];
   tree->SetBranchAddress( "decayMode", decayMode );
   //int decayMode[300];
