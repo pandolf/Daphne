@@ -94,6 +94,12 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Float_t phiDau2[300];
       Int_t   pdgIdDau2[300];
 
+      Int_t nTrackable;
+      Int_t nTrackableProtons;
+      Int_t nTrackableProtons_dEdx;
+      Int_t nTrackableProtonsFromDelta;
+      Int_t nTrackableProtonsFromDelta_dEdx;
+
       //Float_t ptDau[300][100];
       //Float_t mDau[300][100];
       //Float_t etaDau[300][100];
