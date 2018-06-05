@@ -53,6 +53,11 @@ class DaphneAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
       Int_t event;
 
+      Int_t nVert;
+      Int_t nTracksPV;
+      Int_t nTracksPV_min0;
+      Float_t nTracksPU;
+      Float_t nTracksPU_min0;
 
       edm::EDGetTokenT< std::vector<reco::Vertex> > vertexContainerToken_;
   

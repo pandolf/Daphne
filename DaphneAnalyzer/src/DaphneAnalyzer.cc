@@ -53,6 +53,11 @@ DaphneAnalyzer::DaphneAnalyzer(const edm::ParameterSet& conf)
 
   m_tree = fs_->make<TTree>("dtree","");
 
+  m_tree->Branch("nVert"         ,&nVert         ,"nVert/I"         );
+  m_tree->Branch("nTracksPV"     ,&nTracksPV     ,"nTracksPV/I"     );
+  m_tree->Branch("nTracksPV_min0",&nTracksPV_min0,"nTracksPV_min0/I");
+  m_tree->Branch("nTracksPU"     ,&nTracksPU     ,"nTracksPU/F"     );
+  m_tree->Branch("nTracksPU_min0",&nTracksPU_min0,"nTracksPU_min0/F");
 
   event = 0;  
   
@@ -82,7 +87,38 @@ DaphneAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken( vertexContainerToken_, vertices);
 
 
+   nVert = vertices->size();
+
+   nTracksPU      = 0.;
+   nTracksPU_min0 = 0.;
+
+   bool first = true;
+
+   for( vector<reco::Vertex>::const_iterator v=vertices->begin(); v != vertices->end(); ++v ) {
+
+     if( first ) {
+
+       nTracksPV      = v->nTracks();
+       nTracksPV_min0 = v->nTracks(0.);
+
+       first = false;
+
+     } else {
   
+       nTracksPU      += v->nTracks();
+       nTracksPU_min0 += v->nTracks(0.);
+
+     }
+
+   } // for vertices
+
+   if( nVert>1 ) {
+
+     nTracksPU      /= ( nVert-1. );
+     nTracksPU_min0 /= ( nVert-1. );
+
+   }
+
    event++;  
    m_tree->Fill();
 
