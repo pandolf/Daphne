@@ -5,7 +5,7 @@
 #include "TH1D.h"
 #include "TLorentzVector.h"
 
-bool TEST = false;
+bool TEST = true;
 
 
 
@@ -16,11 +16,11 @@ int main( int argc, char* argv[]) {
 
   if( argc < 2 || TEST ) {
 
-    file = TFile::Open( "../genTree_QCD_Pt15to30.root" );
+    file = TFile::Open( "../python/genTree_QCD_Pt15to30.root" );
     tree = (TTree*)file->Get("demo/gentree");
 
     if( tree ) {
-      std::cout << "-> You didn't pass enough arguments, so running on test tree: ../genTree_QCD_Pt15to30.root" << std::endl;
+      std::cout << "-> You didn't pass enough arguments, so running on test tree: ../python/genTree_QCD_Pt15to30.root" << std::endl;
       TEST = true;
     } else {
       std::cout << "-> USAGE: ./drawGenTree [prodName] [dataset=\'QCD_Pt_15to30\']" << std::endl;
