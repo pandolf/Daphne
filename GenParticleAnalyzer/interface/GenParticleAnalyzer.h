@@ -1,3 +1,7 @@
+#ifndef GENPARTICLEANALYZER_H
+#define GENPARTICLEANALYZER_H
+
+
 // system include files
 #include <memory>
 #include <iostream>
@@ -112,3 +116,5 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
   
 };
 
+
+#endif
