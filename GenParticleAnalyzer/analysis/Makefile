@@ -16,13 +16,14 @@ EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64
 genTreeAnalyzer: genTreeAnalyzer.cpp 
 	$(CC) -Wall $(INCLUDES) -o genTreeAnalyzer genTreeAnalyzer.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-
 genTreeMerger: genTreeMerger.cpp 
 	$(CC) -Wall $(INCLUDES) -o genTreeMerger genTreeMerger.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-
 drawGenTree: drawGenTree.cpp 
 	$(CC) -Wall $(INCLUDES) -o drawGenTree drawGenTree.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawBranchingRatios: drawBranchingRatios.cpp DaphneCommon.o
+	$(CC) -Wall $(INCLUDES) -o drawBranchingRatios drawBranchingRatios.cpp DaphneCommon.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 DaphneCommon.o: ../src/DaphneCommon.cc
