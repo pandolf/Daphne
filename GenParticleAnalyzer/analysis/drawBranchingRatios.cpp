@@ -49,7 +49,6 @@ int main() {
   c1->SaveAs("branchingRatios.eps");
 
   c1->Clear();
-  c1->SetLogy();
 
   TF1* br_delta = new TF1("br_delta", "0.005*TMath::Power(1.- x*x/((1232.-938.)*(1232.-938.)), 1.5 )", 0., xMax);
   br_delta->SetLineColor(30);
