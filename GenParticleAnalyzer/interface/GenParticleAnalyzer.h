@@ -99,6 +99,8 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Int_t   pdgIdDau2[300];
 
       Int_t nTrackable;
+      Int_t nTrackableKappas;
+      Int_t nTrackablePions;
       Int_t nTrackableProtons;
       Int_t nTrackableProtons_dEdx;
       Int_t nTrackableProtonsFromDelta;

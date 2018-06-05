@@ -141,6 +141,8 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("pdgIdDau2",pdgIdDau2,"pdgIdDau2[nMC]/I");
 
   m_tree->Branch("nTrackable"                     , &nTrackable                     , "nTrackable/I"                      );
+  m_tree->Branch("nTrackablePions"                , &nTrackablePions                , "nTrackablePions/I"                 );
+  m_tree->Branch("nTrackableKappas"               , &nTrackableKappas               , "nTrackableKappas/I"                );
   m_tree->Branch("nTrackableProtons"              , &nTrackableProtons              , "nTrackableProtons/I"               );
   m_tree->Branch("nTrackableProtons_dEdx"         , &nTrackableProtons_dEdx         , "nTrackableProtons_dEdx/I"          );
   m_tree->Branch("nTrackableProtonsFromDelta"     , &nTrackableProtonsFromDelta     , "nTrackableProtonsFromDelta/I"      );
@@ -181,6 +183,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        
    nTrackable = 0;
+   nTrackableKappas = 0;
+   nTrackablePions = 0;
    nTrackableProtons = 0;
    nTrackableProtons_dEdx = 0;
    nTrackableProtonsFromDelta = 0;
@@ -220,7 +224,14 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      bool isTrackable = (pt>0.5 && abs(p->eta()<2.4));
 
      if( abs(p->pdgId())==321 || abs(p->pdgId())==211 || (abs(p->pdgId())==2212 && p->mother()!=0) ) {
-       if( isTrackable ) nTrackable++;
+       if( isTrackable ) {
+         nTrackable++;
+         if( abs(p->pdgId())==321 ) {
+           nTrackableKappas++;
+         } else if( abs(p->pdgId())==211 ) {
+           nTrackablePions++;
+         }
+       }
      }
 
      //if( p->mother()!=0 )
