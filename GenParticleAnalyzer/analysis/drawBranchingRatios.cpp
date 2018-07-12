@@ -4,7 +4,28 @@
 #include "TH2D.h"
 #include "TF1.h"
 #include "TLegend.h"
+#include "TMath.h"
 
+
+
+Double_t myfunction(Double_t *x, Double_t *par) {
+
+  Double_t pi = 3.14159;
+  Double_t mA =x[0];
+  Double_t alpha = 1./137.;
+  Double_t denom = pi*pi*pi*pi*1024.;
+  Double_t m_K = 494.;
+  Double_t m_pi = 140.;
+  
+  Double_t gamma_i = alpha*mA*mA/(denom*m_K)*1E-12*(3.+6.*mA*mA/(m_K*m_K))*TMath::Power( 1. + (m_pi*m_pi - mA*mA)*(m_pi*m_pi - mA*mA)/(m_K*m_K*m_K*m_K) - 2.*(m_pi*m_pi + mA*mA)/(m_K*m_K), 1.5);
+  
+  Double_t gamma_tot = 5.3E-14;
+
+  Double_t f = gamma_i/gamma_tot; 
+
+  return f;
+
+}
 
 
 
@@ -13,7 +34,7 @@ int main() {
 
   DaphneCommon::setStyle();
 
-  float xMax = 290.;
+  float xMax = 450.;
 
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 1.5E-7, 1. );
   h2_axes->SetXTitle( "m_{A'} [MeV]" );
@@ -23,9 +44,17 @@ int main() {
   br_pizero->SetLineColor(46); 
   br_pizero->SetLineWidth(2); 
 
+  // the following is taken from eq. 12 of http://arxiv.org/abs/0811.1030v1
   TF1* br_kappa3 = new TF1("br_kappa", "8E-5*x*x/10000.", 0., xMax);
   br_kappa3->SetLineColor(38);
   br_kappa3->SetLineWidth(2);
+
+  // the following is taken from eq. 14 of https://arxiv.org/pdf/1309.5084.pdf
+  //TF1* br_kappa3_2 = new TF1("br_kappa_2", "x*x/(1024.*137.*97.4*494.*5.3E-2)*(3.+6.*x*x/(494.*494.))*TMath::Power(1.+(140.*140.-x*x)*(140.*140.-x*x)/(494.*494.*494.*494.) - 2.*(140.*140. + x*x)/(494.*494.), 1.5)", 0., xMax);
+  TF1* br_kappa3_2 = new TF1("br_kappa_2", "x*x/(1024.*137.*97.4*494.*5.3E-2)*(3.+6.*x*x/(494.*494.))*TMath::Max( TMath::Power(1.+(140.*140.-x*x)*(140.*140.-x*x)/(494.*494.*494.*494.) - 2.*(140.*140. + x*x)/(494.*494.), 1.5), 0.)", 1., 400.);
+  br_kappa3_2->SetLineColor(kRed+3);
+  br_kappa3_2->SetLineWidth(2);
+  br_kappa3_2->SetLineStyle(2);
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
   c1->cd();
@@ -35,6 +64,7 @@ int main() {
 
   br_pizero->Draw("L same" );
   br_kappa3->Draw("L same" );
+  br_kappa3_2->Draw("L same" );
 
   TLegend* legend = new TLegend( 0.5, 0.75, 0.9, 0.9 );
   legend->SetFillColor(0);
