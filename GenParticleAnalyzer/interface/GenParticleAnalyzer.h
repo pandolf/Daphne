@@ -69,6 +69,7 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Float_t etaMC[300];
       Float_t phiMC[300];
       Float_t vertR[300];
+      Float_t vertZ[300];
       Int_t trkIso[300];
       Int_t nLowP[300];
       Int_t nCharged[300];
@@ -99,6 +100,7 @@ class GenParticleAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResource
       Int_t   pdgIdDau2[300];
 
       Int_t nTrackable;
+      Int_t nTrackable_pt1;
       Int_t nTrackableKappas;
       Int_t nTrackablePions;
       Int_t nTrackableProtons;
