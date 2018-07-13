@@ -110,6 +110,7 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("etaMC",etaMC,"etaMC[nMC]/F");
   m_tree->Branch("phiMC",phiMC,"phiMC[nMC]/F");
   m_tree->Branch("vertR",vertR,"vertR[nMC]/F");
+  m_tree->Branch("vertZ",vertZ,"vertZ[nMC]/F");
   m_tree->Branch("trkIso",trkIso,"trkIso[nMC]/I");
   m_tree->Branch("nLowP",nLowP,"nLowP[nMC]/I");
   m_tree->Branch("nCharged",nCharged,"nCharged[nMC]/I");
@@ -141,6 +142,7 @@ GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& conf)
   m_tree->Branch("pdgIdDau2",pdgIdDau2,"pdgIdDau2[nMC]/I");
 
   m_tree->Branch("nTrackable"                     , &nTrackable                     , "nTrackable/I"                      );
+  m_tree->Branch("nTrackable_pt1"                 , &nTrackable_pt1                 , "nTrackable_pt1/I"                  );
   m_tree->Branch("nTrackablePions"                , &nTrackablePions                , "nTrackablePions/I"                 );
   m_tree->Branch("nTrackableKappas"               , &nTrackableKappas               , "nTrackableKappas/I"                );
   m_tree->Branch("nTrackableProtons"              , &nTrackableProtons              , "nTrackableProtons/I"               );
@@ -183,6 +185,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        
    nTrackable = 0;
+   nTrackable_pt1 = 0;
    nTrackableKappas = 0;
    nTrackablePions = 0;
    nTrackableProtons = 0;
@@ -226,6 +229,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      if( abs(p->pdgId())==321 || abs(p->pdgId())==211 || (abs(p->pdgId())==2212 && p->mother()!=0) ) {
        if( isTrackable ) {
          nTrackable++;
+         if( pt > 1.0 )
+           nTrackable_pt1++;
          if( abs(p->pdgId())==321 ) {
            nTrackableKappas++;
          } else if( abs(p->pdgId())==211 ) {
@@ -258,6 +263,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        phiMC[nMC] = p->phi();
 
        vertR[nMC] = -1.;
+       vertZ[nMC] = -1.;
        trkIso[nMC] = 0;
        nLowP[nMC] = 0;
        nCharged[nMC] = 0;
@@ -383,19 +389,20 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
          if( simTrackId[i] == iVert->parentIndex() ) {
 
-           Float_t vertX = iVert->position().x();
-           Float_t vertY = iVert->position().y();
-           //Float_t vertZ = iVert->position().z();
+           Float_t vertx = iVert->position().x();
+           Float_t verty = iVert->position().y();
+           Float_t vertz = iVert->position().z();
            
            //Float_t eta = iTrack->momentum().eta();
            //Float_t theta = 2.*atan( exp(-eta));
 
-           vertR[i] = sqrt(vertX*vertX+vertY*vertY);
+           vertR[i] = sqrt(vertx*vertx+verty*verty);
+           vertZ[i] = vertz;
 
            if( vertR[i] < 60. && pMC[i]<1.05 && fabs(etaMC[i])<2.4 ) nGoodKappas++;
 
 
-           if( vertR[i]<60. && fabs(etaMC[i])<2.4 ) {
+           if( vertR[i]<60. && fabs(etaMC[i])<2.4 && fabs(vertZ[i])<2. ) {
 
              //std::cout << std::endl;
              //std::cout << "PDGID: " << kappas[i]->pdgId() << " e: " << kappas[i]->energy() << " eta: " << kappas[i]->eta() << " phi: " << kappas[i]->phi() << " decayed to: " << std::endl;
@@ -421,11 +428,14 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
                  if( abs(id) == 211 ) nPiCharged++;
                  else if( id == 111 ) nPiNeutral++;
-                 else if( id > 1000 ) nBaryons++;
+                 else if( abs(id)>1000 && abs(id)<9999 ) {
+                   nBaryons++;
+                   if( abs(id) == 2212 ) nProtons++;
+                 }
                  else if( abs(id) == 11 ) nElectrons++;
                  else if( abs(id) == 13 ) nMuons++;
                  else if( id == 22 ) nPhotons++;
-                 else if( abs(id) == 2212 ) nProtons++;
+
 
                  if( p<0.15 && fabs(iSim->charge())>0.01 ) nLowP[i]++;
 
