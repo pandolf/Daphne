@@ -127,13 +127,13 @@ int main( int argc, char* argv[]) {
   TH1D* h1_mPPP_long_d0       = new TH1D( "mPPP_long_d0"       , "", 50., 0.1, 5.1);
   TH1D* h1_mPPP_long_d7       = new TH1D( "mPPP_long_d7"       , "", 50., 0.1, 5.1);
 
-  TH1D* h1_mPPP_d7       = new TH1D( "mPPP_d7"       , "", 50., 0., 1.);
-  TH1D* h1_mPEE_d7       = new TH1D( "mPEE_d7"       , "", 50., 0., 1.);
+  TH1D* h1_mPPP_d7       = new TH1D( "mPPP_d7"       , "", 120, 0., 0.6);
+  TH1D* h1_mPEE_d7       = new TH1D( "mPEE_d7"       , "", 120, 0., 0.6);
 
-  TH1D* h1_mPPP_d8       = new TH1D( "mPPP_d8"       , "", 50., 0., 1.);
-  TH1D* h1_mPEE_d8       = new TH1D( "mPEE_d8"       , "", 50., 0., 1.);
-  TH1D* h1_mPEE_d8_right = new TH1D( "mPEE_d8_right" , "", 50., 0., 1.);
-  TH1D* h1_mPEE_d8_wrong = new TH1D( "mPEE_d8_wrong" , "", 50., 0., 1.);
+  TH1D* h1_mPPP_d8       = new TH1D( "mPPP_d8"       , "", 120, 0., 0.6);
+  TH1D* h1_mPEE_d8       = new TH1D( "mPEE_d8"       , "", 120, 0., 0.6);
+  TH1D* h1_mPEE_d8_right = new TH1D( "mPEE_d8_right" , "", 120, 0., 0.6);
+  TH1D* h1_mPEE_d8_wrong = new TH1D( "mPEE_d8_wrong" , "", 120, 0., 0.6);
 
 
 
