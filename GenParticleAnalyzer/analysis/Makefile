@@ -19,11 +19,14 @@ genTreeAnalyzer: genTreeAnalyzer.cpp
 genTreeMerger: genTreeMerger.cpp 
 	$(CC) -Wall $(INCLUDES) -o genTreeMerger genTreeMerger.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-drawGenTree: drawGenTree.cpp 
-	$(CC) -Wall $(INCLUDES) -o drawGenTree drawGenTree.cpp $(ROOTFLAG) $(EXTRALIBS)
+drawGenHistos: drawGenHistos.cpp DaphneCommon.o
+	$(CC) -Wall $(INCLUDES) -o drawGenHistos drawGenHistos.cpp DaphneCommon.o $(ROOTFLAG) $(EXTRALIBS)
 
 drawBranchingRatios: drawBranchingRatios.cpp DaphneCommon.o
 	$(CC) -Wall $(INCLUDES) -o drawBranchingRatios drawBranchingRatios.cpp DaphneCommon.o $(ROOTFLAG) $(EXTRALIBS)
+
+drawBranchingRatios_forQ: drawBranchingRatios_forQ.cpp DaphneCommon.o
+	$(CC) -Wall $(INCLUDES) -o drawBranchingRatios_forQ drawBranchingRatios_forQ.cpp DaphneCommon.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 DaphneCommon.o: ../src/DaphneCommon.cc
