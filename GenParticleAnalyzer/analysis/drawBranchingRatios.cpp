@@ -85,6 +85,8 @@ int main() {
   c1->SaveAs("branchingRatios_all3.eps");
 
 
+  std::cout << "BR(m=200MeV) = " << br_kappa3_2->Eval(200.) << " * epsilon^2" << std::endl;
+
   return 0;
 
 }
