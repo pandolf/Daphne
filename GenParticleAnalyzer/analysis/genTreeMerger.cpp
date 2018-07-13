@@ -39,7 +39,7 @@ int main( int argc, char* argv[] ) {
   system( Form("mkdir -p %s", outdir.c_str()) );
 
 
-  std::string outfileName( Form("%s/%s.root", outdir.c_str(), datasetName.c_str()));
+  std::string outfileName( Form("%s/mergedTree.root", outdir.c_str()) );
   TFile* outfile = TFile::Open( outfileName.c_str(), "RECREATE" );
   outfile->cd();
 
