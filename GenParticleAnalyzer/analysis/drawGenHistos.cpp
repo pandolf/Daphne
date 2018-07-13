@@ -95,6 +95,46 @@ int main( int argc, char* argv[]) {
   c1->SaveAs( Form("%s/mPPP_d07.eps", outdir.c_str()) );
   c1->SaveAs( Form("%s/mPPP_d07.pdf", outdir.c_str()) );
 
+  c1->Clear();
+
+  TH1D* h1_mPPP_d7 = (TH1D*)file->Get("mPPP_d7");
+  TH1D* h1_mPEE_d7 = (TH1D*)file->Get("mPEE_d7");
+  
+  h1_mPEE_d7->SetXTitle("M(3 tracks) [GeV]");
+  h1_mPEE_d7->SetYTitle("Arbitrary Units" );
+
+  h1_mPEE_d7->SetFillColor(38);
+  h1_mPEE_d7->SetLineColor(38);
+  h1_mPEE_d7->SetLineWidth(2);
+  h1_mPEE_d7->SetFillStyle(3004);
+
+  h1_mPPP_d7->SetFillColor(46);
+  h1_mPPP_d7->SetLineColor(46);
+  h1_mPPP_d7->SetLineWidth(2);
+  h1_mPPP_d7->SetFillStyle(3005);
+
+  h1_mPEE_d7->GetXaxis()->SetRangeUser(0., 0.6001);
+
+  h1_mPEE_d7->Draw();
+  h1_mPPP_d7->Draw("same");
+
+  delete legend;
+  legend = new TLegend( 0.2, 0.7, 0.5, 0.9 );
+  legend->SetFillColor(0);
+  legend->SetTextSize(0.038);
+  legend->SetHeader( "K #rightarrow #pi #pi #pi" );
+  legend->AddEntry( h1_mPPP_d7, "m_{#pi} m_{#pi} m_{#pi}", "F" );
+  legend->AddEntry( h1_mPEE_d7, "m_{#pi} m_{e} m_{e}", "F" );
+  legend->Draw("same");
+
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs( Form("%s/mPPP_PEE_d7.eps", outdir.c_str()) );
+  c1->SaveAs( Form("%s/mPPP_PEE_d7.pdf", outdir.c_str()) );
+
+
 
   return 0;
 
