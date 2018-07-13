@@ -6,7 +6,7 @@
 #include "TLorentzVector.h"
 
 bool TEST = true;
-
+bool FAST = false;
 
 
 int main( int argc, char* argv[]) {
@@ -23,7 +23,7 @@ int main( int argc, char* argv[]) {
       std::cout << "-> You didn't pass enough arguments, so running on test tree: ../python/genTree_QCD_Pt15to30.root" << std::endl;
       TEST = true;
     } else {
-      std::cout << "-> USAGE: ./drawGenTree [prodName] [dataset=\'QCD_Pt_15to30\']" << std::endl;
+      std::cout << "-> USAGE: ./drawGenTree [prodName] [fast]" << std::endl;
       exit(1);
     }
 
@@ -32,12 +32,22 @@ int main( int argc, char* argv[]) {
 
   std::string prodName(argv[1]);
   std::string dataset("QCD_Pt_15to30");
+  //if( argc>2 ) {
+  //  dataset = std::string(argv[2]);
+  //}
+
+
+  std::string fast_arg;
   if( argc>2 ) {
-    dataset = std::string(argv[2]);
+    fast_arg = std::string(argv[2]);
+    if( fast_arg=="FAST" || fast_arg=="fast" || fast_arg=="true" || fast_arg=="TRUE" || fast_arg=="True" ) FAST=true;
   }
 
+  if( FAST ) 
+    std::cout << "-> FAST running!" << std::endl;
+
   file = TFile::Open( Form("%s/%s/mergedTree.root", prodName.c_str(), dataset.c_str()) );
-  std::cout << " -> Opened file: " << file->GetName() << std::endl;
+  std::cout << "-> Opened file: " << file->GetName() << std::endl;
   tree = (TTree*)file->Get("gentree");
 
 
@@ -103,14 +113,19 @@ int main( int argc, char* argv[]) {
   tree->SetBranchAddress( "pdgIdDau2", pdgIdDau2 );
 
 
-  TFile* outfile = TFile::Open( Form("%s/%s/histos.root", prodName.c_str(), dataset.c_str()), "RECREATE" );
+  std::string outfileName(Form("%s/%s/histos", prodName.c_str(), dataset.c_str()));
+  if( FAST ) outfileName = outfileName + "_FAST";
+  outfileName = outfileName + ".root";
+
+  TFile* outfile = TFile::Open( outfileName.c_str(), "RECREATE" );
   outfile->cd();
 
   TH1D* h1_cutflow = new TH1D( "cutflow", "", 6, -0.5, 5.5 );
-  TH1D* h1_nCharged_nuclint = new TH1D( "nCharged_nuclint", "", 21, -0.5, 20.5 );
 
-  TH1D* h1_mPPP_d0       = new TH1D( "mPPP_d0"       , "", 50., 0., 1.);
-  TH1D* h1_mPEE_d0       = new TH1D( "mPEE_d0"       , "", 50., 0., 1.);
+  TH1D* h1_nCharged_nuclint = new TH1D( "nCharged_nuclint", "", 9, -0.5, 8.5 );
+
+  TH1D* h1_mPPP_long_d0       = new TH1D( "mPPP_long_d0"       , "", 50., 0.1, 5.1);
+  TH1D* h1_mPPP_long_d7       = new TH1D( "mPPP_long_d7"       , "", 50., 0.1, 5.1);
 
   TH1D* h1_mPPP_d7       = new TH1D( "mPPP_d7"       , "", 50., 0., 1.);
   TH1D* h1_mPEE_d7       = new TH1D( "mPEE_d7"       , "", 50., 0., 1.);
@@ -121,6 +136,8 @@ int main( int argc, char* argv[]) {
   TH1D* h1_mPEE_d8_wrong = new TH1D( "mPEE_d8_wrong" , "", 50., 0., 1.);
 
 
+
+
   int nGoodEta=0;
   int nGoodEtaVert=0;
   int nGoodEtaVertP=0;
@@ -128,6 +145,7 @@ int main( int argc, char* argv[]) {
   int nGoodEtaVertP_peeLowP=0;
 
   int nentries = tree->GetEntries();
+  if( FAST ) nentries = 100000;
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
@@ -150,34 +168,33 @@ int main( int argc, char* argv[]) {
           h1_cutflow->Fill( 2 );
           nGoodEtaVert += 1;
 
+          if( decayMode[i] == 0 ) { // nuclear interactions
+
+            h1_nCharged_nuclint->Fill( nCharged[i] );
+            h1_mPPP_long_d0->Fill( m_ppp [i] );
+
+          }
+
+
           if( pMC[i] < 1.05 ) {
 
             h1_cutflow->Fill( 3 );
             nGoodEtaVertP += 1;
 
-            if( decayMode[i] == 0 ) { // nuclear interactions
-              h1_nCharged_nuclint->Fill( nCharged[i] );
-            }
-
 
             //if( nCharged[i]==3 ) {
-            if( (decayMode[i]==0 && (nCharged[i]==3 || nCharged[i]==4)) || decayMode[i]==7 || decayMode[i]==8 ) {
+            //if( (decayMode[i]==0 && (nCharged[i]==3 || nCharged[i]==4)) || decayMode[i]==7 || decayMode[i]==8 ) {
+            if( decayMode[i]==7 || decayMode[i]==8 ) {
 
               h1_cutflow->Fill( 4 );
               nGoodEtaVertP_pee += 1;
 
 
-              if( decayMode[i]==0 ) { // nuclear interactions
 
-                h1_mPPP_d0->Fill( m_ppp [i] );
+              if( decayMode[i]==7 ) { // pi+ pi- pi+
 
-                h1_mPEE_d0->Fill( m_pee0[i] );
-                h1_mPEE_d0->Fill( m_pee1[i] );
-                h1_mPEE_d0->Fill( m_pee2[i] );
-
-              } else if( decayMode[i]==7 ) { // pi+ pi- pi+
-
-                h1_mPPP_d7->Fill( m_ppp[i] );
+                h1_mPPP_d7     ->Fill( m_ppp[i] );
+                h1_mPPP_long_d7->Fill( m_ppp[i] );
 
                 h1_mPEE_d7->Fill( m_pee0[i] );
                 h1_mPEE_d7->Fill( m_pee1[i] );
@@ -255,8 +272,8 @@ int main( int argc, char* argv[]) {
 
   h1_cutflow->Write();
 
-  h1_mPPP_d0->Write();
-  h1_mPEE_d0->Write();
+  h1_mPPP_long_d0->Write();
+  h1_mPPP_long_d7->Write();
   h1_mPPP_d7->Write();
   h1_mPEE_d7->Write();
   h1_mPPP_d8->Write();
